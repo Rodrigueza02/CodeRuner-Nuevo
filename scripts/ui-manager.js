@@ -4,58 +4,117 @@ UiManager.attributes.add('htmlAsset', { type: 'asset', assetType: 'html', title:
 UiManager.attributes.add('cssAsset', { type: 'asset', assetType: 'css', title: 'Archivo CSS' });
 
 UiManager.prototype.initialize = function() {
-    // 1. Inyectar el CSS
+    this.queue = [];
+    
+    // Inyectar CSS
     if (this.cssAsset) {
         var style = document.createElement('style');
         style.innerHTML = this.cssAsset.resource;
         document.head.appendChild(style);
     }
 
-    // 2. Inyectar el HTML
+    // Inyectar HTML
     if (this.htmlAsset) {
         var div = document.createElement('div');
         div.innerHTML = this.htmlAsset.resource;
         document.body.appendChild(div);
 
-        // 3. Conectar los botones del HTML con PlayCanvas
-        this.bindButtons(div);
+        // Guardar referencias a los elementos del DOM
+        this.container = div;
+        this.queueElement = div.querySelector('#queue');
+        this.emptyMsg = div.querySelector('#empty-msg');
+        this.logDisplay = div.querySelector('#log-display');
+
+        this.bindButtons();
+        this.startEmotionalLogs();
     }
 };
 
-UiManager.prototype.bindButtons = function(container) {
+UiManager.prototype.bindButtons = function() {
     var self = this;
 
-    // Buscar botones por clase (definidas en el HTML)
-    var btnForward = container.querySelector('.btn-move');
-    var btnLeft = container.querySelectorAll('.btn-turn')[1]; // El segundo botón de giro
-    var btnRight = container.querySelectorAll('.btn-turn')[0]; // El primer botón de giro
-    var btnAction = container.querySelector('.btn-action');
+    var btnMove = this.container.querySelector('#btn-move');
+    var btnJump = this.container.querySelector('#btn-jump');
+    var btnExecute = this.container.querySelector('#btn-execute');
+    var btnReset = this.container.querySelector('#btn-reset');
 
-    if (btnForward) {
-        btnForward.addEventListener('click', function() {
-            self.app.fire('robot:move', 'forward');
-            console.log('Evento: Avanzar');
+    if (btnMove) {
+        btnMove.addEventListener('click', function() {
+            self.addToQueue('MOVER', '🚀', 'move');
         });
     }
 
-    if (btnLeft) {
-        btnLeft.addEventListener('click', function() {
-            self.app.fire('robot:turn', 'left');
-            console.log('Evento: Izquierda');
+    if (btnJump) {
+        btnJump.addEventListener('click', function() {
+            self.addToQueue('SALTAR', '⭐', 'jump');
         });
     }
 
-    if (btnRight) {
-        btnRight.addEventListener('click', function() {
-            self.app.fire('robot:turn', 'right');
-            console.log('Evento: Derecha');
+    if (btnExecute) {
+        btnExecute.addEventListener('click', function() {
+            if (self.queue.length > 0) {
+                self.app.fire('robot:executeSequence', [...self.queue]);
+                self.updateLog("Iniciando secuencia... ¡No me dejes solo!");
+                setTimeout(function() { self.clearQueue(); }, 1000);
+            } else {
+                self.updateLog("ERROR: Memoria vacía.");
+            }
         });
     }
 
-    if (btnAction) {
-        btnAction.addEventListener('click', function() {
-            self.app.fire('robot:action');
-            console.log('Evento: Acción');
+    if (btnReset) {
+        btnReset.addEventListener('click', function() {
+            self.clearQueue();
+            self.app.fire('robot:reset');
         });
     }
+};
+
+UiManager.prototype.addToQueue = function(action, icon, type) {
+    if (this.emptyMsg) this.emptyMsg.style.display = 'none';
+    
+    this.queue.push(type);
+    
+    var item = document.createElement('div');
+    item.className = 'queue-item ' + type;
+    item.innerHTML = '<div style="font-size: 20px;">' + icon + '</div>' +
+                     '<div style="font-weight: bold;">' + action + '</div>';
+    
+    if (this.queueElement) this.queueElement.appendChild(item);
+    this.updateLog("Fragmento añadido: " + action);
+};
+
+UiManager.prototype.clearQueue = function() {
+    this.queue = [];
+    if (this.queueElement) {
+        this.queueElement.innerHTML = '<div id="empty-msg" style="text-align: center; color: rgba(255,255,255,0.2); margin-top: 50px; width: 100%;">COLA_DE_INSTRUCCIONES_VACÍA</div>';
+        this.emptyMsg = this.container.querySelector('#empty-msg');
+    }
+    this.updateLog("Memoria purgada.");
+};
+
+UiManager.prototype.updateLog = function(msg) {
+    if (!this.logDisplay) return;
+    this.logDisplay.style.animation = 'none';
+    this.logDisplay.offsetHeight; // reflow
+    this.logDisplay.innerText = "> " + msg;
+    this.logDisplay.style.animation = 'typing 2s steps(40, end), blink .75s step-end infinite';
+};
+
+UiManager.prototype.startEmotionalLogs = function() {
+    var self = this;
+    var messages = [
+        "Siento que me desvanezco...",
+        "Este error... duele.",
+        "Buscando mi propósito...",
+        "¿Quién me controla desde fuera?",
+        "Reconstruyendo mi memoria."
+    ];
+    
+    setInterval(function() {
+        if (Math.random() > 0.8) {
+            var msg = messages[Math.floor(Math.random() * messages.length)];
+            self.updateLog(msg);
+        }
+    }, 15000);
 };
