@@ -71,46 +71,42 @@
         /* 1. Panel de Acciones */
         .action-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(3, 1fr); /* Cambio a 3 columnas */
+            gap: 12px;
+            margin-bottom: 25px;
         }
 
         .action-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid var(--neon-blue);
-            border-radius: 20px;
-            padding: 15px;
+            border-radius: 18px;
+            padding: 12px;
             color: white;
             cursor: pointer;
             display: flex;
+            flex-direction: column; /* Icono arriba, texto abajo para ahorrar espacio */
             align-items: center;
-            gap: 15px;
+            gap: 8px;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
         }
 
-        .action-btn:hover {
-            background: rgba(0, 210, 255, 0.1);
-            transform: scale(1.03) translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-        }
-
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-
         .action-btn .icon-box {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             background: var(--neon-blue);
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 20px;
             box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .action-btn .btn-label {
+            font-size: 11px;
+            letter-spacing: 1px;
         }
 
         /* 2. Cola de Instrucciones */
@@ -321,17 +317,25 @@
                     <div class="icon-box">🚀</div>
                     <div class="btn-label">MOVER</div>
                 </button>
+                <button class="action-btn" id="btn-turn">
+                    <div class="icon-box" style="background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple);">↪️</div>
+                    <div class="btn-label">GIRAR</div>
+                </button>
                 <button class="action-btn" id="btn-jump">
-                    <div class="icon-box" style="background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple);">⭐</div>
+                    <div class="icon-box" style="background: #e67e22; box-shadow: 0 0 10px #e67e22;">⭐</div>
                     <div class="btn-label">SALTAR</div>
                 </button>
-                <button class="action-btn locked" id="btn-wait" title="Bloqueado: Desbloquea en Nivel 2">
+                <button class="action-btn locked" id="btn-wait" title="Bloqueado: Nivel 2">
                     <div class="icon-box" style="background: #f1c40f; box-shadow: 0 0 10px #f1c40f;">⏳</div>
                     <div class="btn-label">ESPERAR</div>
                 </button>
-                <button class="action-btn locked" id="btn-state" title="Bloqueado: Desbloquea en Nivel 2">
+                <button class="action-btn locked" id="btn-state" title="Bloqueado: Nivel 3">
                     <div class="icon-box" style="background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red);">🧠</div>
                     <div class="btn-label">ESTADO</div>
+                </button>
+                <button class="action-btn" id="btn-reset-small" style="border-color: rgba(255,255,255,0.2);">
+                    <div class="icon-box" style="background: #7f8c8d; box-shadow: 0 0 10px #7f8c8d;">🔄</div>
+                    <div class="btn-label">LIMPIAR</div>
                 </button>
             </div>
 

@@ -34,7 +34,11 @@ UiManager.prototype.bindButtons = function() {
     var self = this;
 
     var btnMove = this.container.querySelector('#btn-move');
+    var btnTurn = this.container.querySelector('#btn-turn');
     var btnJump = this.container.querySelector('#btn-jump');
+    var btnWait = this.container.querySelector('#btn-wait');
+    var btnState = this.container.querySelector('#btn-state');
+    var btnResetSmall = this.container.querySelector('#btn-reset-small');
     var btnExecute = this.container.querySelector('#btn-execute');
     var btnReset = this.container.querySelector('#btn-reset');
 
@@ -44,9 +48,41 @@ UiManager.prototype.bindButtons = function() {
         });
     }
 
+    if (btnTurn) {
+        btnTurn.addEventListener('click', function() {
+            self.addToQueue('GIRAR', '↪️', 'turn');
+        });
+    }
+
     if (btnJump) {
         btnJump.addEventListener('click', function() {
             self.addToQueue('SALTAR', '⭐', 'jump');
+        });
+    }
+
+    if (btnWait) {
+        btnWait.addEventListener('click', function() {
+            if (btnWait.classList.contains('locked')) {
+                self.updateLog("ERROR: Nivel insuficiente para ESPERAR.");
+                return;
+            }
+            self.addToQueue('ESPERAR', '⏳', 'wait');
+        });
+    }
+
+    if (btnState) {
+        btnState.addEventListener('click', function() {
+            if (btnState.classList.contains('locked')) {
+                self.updateLog("ERROR: Nivel insuficiente para CAMBIAR ESTADO.");
+                return;
+            }
+            self.addToQueue('ESTADO', '🧠', 'state');
+        });
+    }
+
+    if (btnResetSmall) {
+        btnResetSmall.addEventListener('click', function() {
+            self.clearQueue();
         });
     }
 

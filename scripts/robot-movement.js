@@ -49,8 +49,15 @@ RobotMovement.prototype.runNextCommand = function(queue, index) {
 
     if (command === 'move') {
         this.entity.translateLocal(0, 0, this.moveSpeed);
+    } else if (command === 'turn') {
+        this.entity.rotateLocal(0, -90, 0); // Giro de 90 grados a la derecha
     } else if (command === 'jump') {
         this.jump();
+    } else if (command === 'wait') {
+        console.log("Robot esperando...");
+        // El robot no hace nada durante este segundo
+    } else if (command === 'state') {
+        this.changeState();
     }
     // El comando 'wait' simplemente deja pasar el tiempo
 
@@ -66,6 +73,13 @@ RobotMovement.prototype.jump = function() {
     setTimeout(function() {
         self.entity.translateLocal(0, -1, 0);
     }, 500);
+};
+
+RobotMovement.prototype.changeState = function() {
+    console.log("Cambiando estado emocional del robot...");
+    // Aquí podrías cambiar el color de una luz o material
+    // Por ahora, lanzamos un mensaje visual en la consola
+    this.app.fire('ui:log', "Sincronización emocional detectada.");
 };
 
 // Limpiar eventos cuando se destruye la entidad
