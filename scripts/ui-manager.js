@@ -19,20 +19,48 @@ UiManager.prototype.initialize = function() {
         div.innerHTML = this.htmlAsset.resource;
         document.body.appendChild(div);
 
-        // Guardar referencias a los elementos del DOM
         this.container = div;
-        this.queueElement = div.querySelector('#queue');
-        this.emptyMsg = div.querySelector('#empty-msg');
-        this.logDisplay = div.querySelector('#log-display');
-
-        this.bindButtons();
-        this.startEmotionalLogs();
+        
+        // DETECTAR QUÉ INTERFAZ ESTAMOS CARGANDO
+        if (div.querySelector('.menu-container')) {
+            console.log("Detectado: Menú Principal");
+            this.bindMainMenuButtons();
+        } else if (div.querySelector('.terminal-interface')) {
+            console.log("Detectado: Terminal de Juego");
+            this.queueElement = div.querySelector('#queue');
+            this.emptyMsg = div.querySelector('#empty-msg');
+            this.logDisplay = div.querySelector('#log-display');
+            this.bindTerminalButtons();
+            this.startEmotionalLogs();
+        }
     }
 };
 
-UiManager.prototype.bindButtons = function() {
+UiManager.prototype.bindMainMenuButtons = function() {
     var self = this;
+    var btnStart = this.container.querySelector('.menu-btn.red');
+    var btnLevels = this.container.querySelector('.menu-btn.blue');
 
+    if (btnStart) {
+        btnStart.addEventListener('click', function() {
+            console.log("Iniciando Protocolo...");
+            // Aquí puedes disparar un evento para cambiar de escena
+            self.app.fire('menu:start');
+        });
+    }
+
+    if (btnLevels) {
+        btnLevels.addEventListener('click', function() {
+            var selector = self.container.querySelector('#level-selector');
+            if (selector) {
+                selector.style.display = (selector.style.display === 'flex') ? 'none' : 'flex';
+            }
+        });
+    }
+};
+
+UiManager.prototype.bindTerminalButtons = function() {
+    var self = this;
     var btnMove = this.container.querySelector('#btn-move');
     var btnTurn = this.container.querySelector('#btn-turn');
     var btnJump = this.container.querySelector('#btn-jump');
@@ -42,58 +70,16 @@ UiManager.prototype.bindButtons = function() {
     var btnExecute = this.container.querySelector('#btn-execute');
     var btnReset = this.container.querySelector('#btn-reset');
 
-    if (btnMove) {
-        btnMove.addEventListener('click', function() {
-            self.addToQueue('MOVER', '🚀', 'move');
-        });
-    }
-
-    if (btnTurn) {
-        btnTurn.addEventListener('click', function() {
-            self.addToQueue('GIRAR', '↪️', 'turn');
-        });
-    }
-
-    if (btnJump) {
-        btnJump.addEventListener('click', function() {
-            self.addToQueue('SALTAR', '⭐', 'jump');
-        });
-    }
-
-    if (btnWait) {
-        btnWait.addEventListener('click', function() {
-            if (btnWait.classList.contains('locked')) {
-                self.updateLog("ERROR: Nivel insuficiente para ESPERAR.");
-                return;
-            }
-            self.addToQueue('ESPERAR', '⏳', 'wait');
-        });
-    }
-
-    if (btnState) {
-        btnState.addEventListener('click', function() {
-            if (btnState.classList.contains('locked')) {
-                self.updateLog("ERROR: Nivel insuficiente para CAMBIAR ESTADO.");
-                return;
-            }
-            self.addToQueue('ESTADO', '🧠', 'state');
-        });
-    }
-
-    if (btnResetSmall) {
-        btnResetSmall.addEventListener('click', function() {
-            self.clearQueue();
-        });
-    }
+    if (btnMove) btnMove.addEventListener('click', function() { self.addToQueue('MOVER', '🚀', 'move'); });
+    if (btnTurn) btnTurn.addEventListener('click', function() { self.addToQueue('GIRAR', '↪️', 'turn'); });
+    if (btnJump) btnJump.addEventListener('click', function() { self.addToQueue('SALTAR', '⭐', 'jump'); });
 
     if (btnExecute) {
         btnExecute.addEventListener('click', function() {
             if (self.queue.length > 0) {
                 self.app.fire('robot:executeSequence', [...self.queue]);
-                self.updateLog("Iniciando secuencia... ¡No me dejes solo!");
+                self.updateLog("Iniciando secuencia...");
                 setTimeout(function() { self.clearQueue(); }, 1000);
-            } else {
-                self.updateLog("ERROR: Memoria vacía.");
             }
         });
     }
