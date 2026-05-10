@@ -31,26 +31,19 @@ var StateManager = pc.createScript('stateManager');
 StateManager.attributes.add('startState', {
     type: 'string',
     default: 'azul',
-    title: 'Estado inicial',
-    description: 'Con qué estado empieza el robot (azul o rojo)',
-    enum: [
-        { 'Azul': 'azul' },
-        { 'Rojo': 'rojo' }
-    ]
+    title: 'Estado inicial'
 });
 
 StateManager.attributes.add('blueMaterial', {
     type: 'asset',
     assetType: 'material',
-    title: 'Material Azul',
-    description: 'El material/color que se aplica al robot en estado azul'
+    title: 'Material Azul'
 });
 
 StateManager.attributes.add('redMaterial', {
     type: 'asset',
     assetType: 'material',
-    title: 'Material Rojo',
-    description: 'El material/color que se aplica al robot en estado rojo'
+    title: 'Material Rojo'
 });
 
 // ============================================================
