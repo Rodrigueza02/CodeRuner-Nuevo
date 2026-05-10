@@ -311,9 +311,6 @@ RobotController.prototype.update = function(dt) {
     }
 };
 
-// ============================================================
-// RESUMEN DE EVENTOS DISPONIBLES
-// ============================================================
 /*
 ERRORES:
 - 'caida' - Robot cae al vacío
