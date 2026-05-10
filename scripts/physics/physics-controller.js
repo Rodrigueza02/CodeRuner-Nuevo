@@ -230,6 +230,22 @@ PhysicsController.prototype.limitSpeed = function() {
 // DETECCIÓN DE SUELO - Usando colisiones
 // ============================================================
 PhysicsController.prototype.onCollisionStart = function(result) {
+    var otherEntity = result.other;
+    
+    // INTEGRACIÓN HELEN: Detectar colisión con obstáculos
+    if (otherEntity.tags && otherEntity.tags.has('obstaculo')) {
+        console.log("[PhysicsController] ¡Colisión con obstáculo!");
+        
+        // Disparar evento para el sistema de logs narrativos
+        this.app.fire('error:detected', {
+            type: 'colision',
+            data: {
+                obstaculo: otherEntity.name,
+                posicion: this.entity.getPosition().clone()
+            }
+        });
+    }
+    
     // Verificar si la colisión es por debajo (suelo)
     for (var i = 0; i < result.contacts.length; i++) {
         var contact = result.contacts[i];
@@ -259,6 +275,43 @@ PhysicsController.prototype.update = function(dt) {
 
     // Limitar velocidad continuamente
     this.limitSpeed();
+    
+    // INTEGRACIÓN HELEN: Detectar si el robot cayó al vacío
+    var pos = this.entity.getPosition();
+    if (pos.y < -10) {
+        console.log("[PhysicsController] ¡Robot cayó al vacío!");
+        
+        // Disparar evento para el sistema de logs narrativos
+        this.app.fire('error:detected', {
+            type: 'caida',
+            data: {
+                posicion: pos.clone(),
+                altura: pos.y
+            }
+        });
+        
+        // Reiniciar posición
+        this.resetPosition();
+    }
+    
+    // INTEGRACIÓN HELEN: Detectar si el robot salió de los límites del mapa
+    var limiteX = 50;
+    var limiteZ = 50;
+    if (Math.abs(pos.x) > limiteX || Math.abs(pos.z) > limiteZ) {
+        console.log("[PhysicsController] ¡Robot fuera de límites!");
+        
+        // Disparar evento para el sistema de logs narrativos
+        this.app.fire('error:detected', {
+            type: 'fueraDeLimites',
+            data: {
+                posicion: pos.clone(),
+                limites: { x: limiteX, z: limiteZ }
+            }
+        });
+        
+        // Reiniciar posición
+        this.resetPosition();
+    }
 };
 
 // ============================================================

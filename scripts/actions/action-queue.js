@@ -89,6 +89,27 @@ ActionQueue.prototype.addAction = function(actionName) {
 
     // Agregar al array
     this.queue.push(actionName);
+    
+    // INTEGRACIÓN HELEN: Detectar si es el primer comando
+    if (this.queue.length === 1) {
+        this.app.fire('info:detected', {
+            type: 'primerComando',
+            data: {
+                comando: actionName
+            }
+        });
+    }
+    
+    // INTEGRACIÓN HELEN: Advertir si la secuencia es muy larga
+    if (this.queue.length > 20) {
+        this.app.fire('error:detected', {
+            type: 'secuenciaMuyLarga',
+            data: {
+                cantidadComandos: this.queue.length,
+                limite: 20
+            }
+        });
+    }
 
     // Avisar a la UI que se agregó (para que muestre la cápsula)
     this.app.fire('queue:updated', this.queue);
@@ -103,6 +124,15 @@ ActionQueue.prototype.executeAll = function() {
     // Si la cola está vacía, no hacer nada
     if (this.queue.length === 0) {
         console.log("[ActionQueue] La cola está vacía, nada que ejecutar");
+        
+        // INTEGRACIÓN HELEN: Disparar evento de secuencia vacía
+        this.app.fire('error:detected', {
+            type: 'secuenciaVacia',
+            data: {
+                mensaje: 'El jugador intentó ejecutar sin comandos'
+            }
+        });
+        
         return;
     }
 

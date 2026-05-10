@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo de Notificación de Log - CodeRunner</title>
+    <style>
+        /* ============================================
+           ESTILOS PARA LAS NOTIFICACIONES DE LOGS
+           Estos estilos pueden ser copiados a la UI
+           principal del juego CodeRunner
+           ============================================ */
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            margin: 0;
+        }
+
+        .demo-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .demo-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .demo-buttons button:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-error { background: #ff4444; color: white; }
+        .btn-warning { background: #ffaa00; color: white; }
+        .btn-success { background: #44ff44; color: white; }
+        .btn-info { background: #4444ff; color: white; }
+
+        /* ============================================
+           CONTENEDOR DE NOTIFICACIONES
+           ============================================ */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+
+        /* ============================================
+           NOTIFICACIÓN INDIVIDUAL
+           ============================================ */
+        .notification {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.closing {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* Barra de color según el tipo */
+        .notification::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+        }
+
+        .notification.error::before { background: #ff4444; }
+        .notification.advertencia::before { background: #ffaa00; }
+        .notification.exito::before { background: #44ff44; }
+        .notification.info::before { background: #4444ff; }
+
+        /* Header de la notificación */
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .notification-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            flex-grow: 1;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .notification-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        /* Mensaje de la notificación */
+        .notification-message {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            padding-left: 34px; /* Alineado con el título */
+        }
+
+        /* Barra de progreso (opcional) */
+        .notification-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-progress-bar {
+            height: 100%;
+            background: currentColor;
+            animation: progress 5s linear forwards;
+        }
+
+        .notification.error .notification-progress-bar { color: #ff4444; }
+        .notification.advertencia .notification-progress-bar { color: #ffaa00; }
+        .notification.exito .notification-progress-bar { color: #44ff44; }
+        .notification.info .notification-progress-bar { color: #4444ff; }
+
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* ============================================
+           VERSIÓN ALTERNATIVA: NOTIFICACIÓN CENTRADA
+           (Para mensajes importantes como nivel completado)
+           ============================================ */
+        .notification-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .notification-modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            text-align: center;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .notification-modal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .notification-modal-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .notification-modal-message {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .notification-modal-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-modal-button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎮 Sistema de Notificaciones - CodeRunner</h1>
+        
+        <div class="demo-buttons">
+            <button class="btn-error" onclick="mostrarError()">Error: Caída</button>
+            <button class="btn-warning" onclick="mostrarAdvertencia()">Advertencia: Estado</button>
+            <button class="btn-success" onclick="mostrarExito()">Éxito: Objetivo</button>
+            <button class="btn-info" onclick="mostrarInfo()">Info: Primer Comando</button>
+            <button class="btn-success" onclick="mostrarModal()">Modal: Nivel Completado</button>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+            <h2>📝 Instrucciones para Maria (UI/UX)</h2>
+            <p>Este es un ejemplo visual de cómo deberían verse las notificaciones de logs narrativos.</p>
+            
+            <h3>Características:</h3>
+            <ul>
+                <li>✅ Notificaciones en la esquina superior derecha</li>
+                <li>✅ Colores según el tipo (error, advertencia, éxito, info)</li>
+                <li>✅ Animaciones suaves de entrada y salida</li>
+                <li>✅ Barra de progreso que indica cuándo se cerrará</li>
+                <li>✅ Botón para cerrar manualmente</li>
+                <li>✅ Modal centrado para mensajes importantes</li>
+            </ul>
+
+            <h3>Cómo Integrar:</h3>
+            <ol>
+                <li>Copiar los estilos CSS a tu archivo de estilos</li>
+                <li>Copiar las funciones JavaScript a tu código</li>
+                <li>Escuchar el evento <code>ui:mostrarLog</code> desde PlayCanvas</li>
+                <li>Llamar a <code>mostrarNotificacion()</code> cuando llegue un evento</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Contenedor de notificaciones -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script>
+        // ============================================
+        // FUNCIONES PARA MOSTRAR NOTIFICACIONES
+        // Maria puede copiar estas funciones a su código
+        // ============================================
+
+        /**
+         * Muestra una notificación en la esquina superior derecha
+         * @param {string} titulo - Título de la notificación
+         * @param {string} mensaje - Mensaje descriptivo
+         * @param {string} tipo - 'error', 'advertencia', 'exito', 'info'
+         * @param {string} icono - Emoji o icono
+         * @param {number} duracion - Duración en milisegundos (default: 5000)
+         */
+        function mostrarNotificacion(titulo, mensaje, tipo, icono, duracion = 5000) {
+            const container = document.getElementById('notificationContainer');
+            
+            // Crear elemento de notificación
+            const notification = document.createElement('div');
+            notification.className = `notification ${tipo}`;
+            
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-icon">${icono}</div>
+                    <div class="notification-title">${titulo}</div>
+                    <button class="notification-close" onclick="cerrarNotificacion(this)">×</button>
+                </div>
+                <div class="notification-message">${mensaje}</div>
+                <div class="notification-progress">
+                    <div class="notification-progress-bar"></div>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto-cerrar después de la duración especificada
+            setTimeout(() => {
+                cerrarNotificacion(notification.querySelector('.notification-close'));
+            }, duracion);
+        }
+
+        /**
+         * Cierra una notificación con animación
+         */
+        function cerrarNotificacion(button) {
+            const notification = button.closest('.notification');
+            notification.classList.add('closing');
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }
+
+        /**
+         * Muestra un modal centrado para mensajes importantes
+         */
+        function mostrarNotificacionModal(titulo, mensaje, icono) {
+            const modal = document.createElement('div');
+            modal.className = 'notification-modal';
+            
+            modal.innerHTML = `
+                <div class="notification-modal-content">
+                    <div class="notification-modal-icon">${icono}</div>
+                    <div class="notification-modal-title">${titulo}</div>
+                    <div class="notification-modal-message">${mensaje}</div>
+                    <button class="notification-modal-button" onclick="cerrarModal(this)">Continuar</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        /**
+         * Cierra el modal
+         */
+        function cerrarModal(button) {
+            const modal = button.closest('.notification-modal');
+            modal.style.animation = 'fadeOut 0.3s ease-out';
+            
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+
+        // ============================================
+        // INTEGRACIÓN CON PLAYCANVAS
+        // Maria debe agregar esto en su script de UI
+        // ============================================
+
+        /**
+         * Escuchar eventos de PlayCanvas
+         * IMPORTANTE: Este código debe ir en un script de PlayCanvas,
+         * no en este HTML de ejemplo
+         */
+        function integrarConPlayCanvas() {
+            // En PlayCanvas, agregar esto en el initialize de tu script de UI:
+            /*
+            this.app.on('ui:mostrarLog', function(logData) {
+                // logData contiene:
+                // - titulo: string
+                // - mensaje: string
+                // - tipo: 'error' | 'advertencia' | 'exito' | 'info'
+                // - icono: string (emoji)
+                // - datos: object (opcional)
+                
+                // Decidir si mostrar notificación normal o modal
+                if (logData.tipo === 'exito' && logData.titulo.includes('completado')) {
+                    // Usar modal para mensajes importantes
+                    mostrarNotificacionModal(
+                        logData.titulo,
+                        logData.mensaje,
+                        logData.icono
+                    );
+                } else {
+                    // Usar notificación normal
+                    mostrarNotificacion(
+                        logData.titulo,
+                        logData.mensaje,
+                        logData.tipo,
+                        logData.icono
+                    );
+                }
+            });
+            */
+        }
+
+        // ============================================
+        // FUNCIONES DE DEMO (para probar en este HTML)
+        // ============================================
+
+        function mostrarError() {
+            mostrarNotificacion(
+                '¡Ups! El robot cayó al vacío',
+                'Parece que el robot no tenía suelo debajo. Recuerda verificar que haya una plataforma antes de avanzar.',
+                'error',
+                '⚠️'
+            );
+        }
+
+        function mostrarAdvertencia() {
+            mostrarNotificacion(
+                'Estado incorrecto',
+                'El robot está en el estado equivocado para esta plataforma. Usa el comando "Cambiar Estado" para sincronizarte.',
+                'advertencia',
+                '🔄'
+            );
+        }
+
+        function mostrarExito() {
+            mostrarNotificacion(
+                '¡Objetivo alcanzado!',
+                'El robot llegó a la meta. ¡Bien hecho!',
+                'exito',
+                '🎯'
+            );
+        }
+
+        function mostrarInfo() {
+            mostrarNotificacion(
+                'Primer comando agregado',
+                'Genial, agregaste tu primer comando. Puedes seguir agregando más comandos para crear una secuencia completa.',
+                'info',
+                '🎓'
+            );
+        }
+
+        function mostrarModal() {
+            mostrarNotificacionModal(
+                '¡Nivel completado! 🎉',
+                '¡Excelente trabajo! Has programado al robot correctamente. ¿Listo para el siguiente desafío?',
+                '✅'
+            );
+        }
+
+        // Agregar animación de fadeOut
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -59,6 +59,9 @@ StateManager.prototype.initialize = function() {
     // Índice del estado actual en la lista
     this.stateIndex = this.states.indexOf(this.currentState);
     if (this.stateIndex === -1) this.stateIndex = 0;
+    
+    // INTEGRACIÓN HELEN: Variable para detectar primer cambio de estado
+    this.primerCambioRealizado = false;
 
     // --- ESCUCHAR EVENTOS ---
     // Cuando el action-queue manda "cambiarEstado"
@@ -90,6 +93,18 @@ StateManager.prototype.changeState = function() {
     this.currentState = this.states[this.stateIndex];
 
     console.log("[StateManager] Estado cambiado: " + previousState + " → " + this.currentState);
+    
+    // INTEGRACIÓN HELEN: Mensaje educativo en el primer cambio de estado
+    if (!this.primerCambioRealizado) {
+        this.primerCambioRealizado = true;
+        this.app.fire('info:detected', {
+            type: 'primerCambioEstado',
+            data: {
+                estadoAnterior: previousState,
+                estadoNuevo: this.currentState
+            }
+        });
+    }
 
     // Aplicar los cambios visuales y de gameplay
     this.applyState();
