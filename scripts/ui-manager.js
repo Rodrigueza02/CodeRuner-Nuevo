@@ -25,6 +25,9 @@ UiManager.prototype.initialize = function() {
         if (div.querySelector('.menu-container')) {
             console.log("Detectado: Menú Principal");
             this.bindMainMenuButtons();
+        } else if (div.querySelector('#section-story')) {
+            console.log("Detectado: Tutorial C-R01");
+            this.bindTutorialButtons();
         } else if (div.querySelector('.terminal-interface')) {
             console.log("Detectado: Terminal de Juego");
             this.queueElement = div.querySelector('#queue');
@@ -120,6 +123,24 @@ UiManager.prototype.bindMainMenuButtons = function() {
         newLine.innerText = '> Monitoreando flujo de datos... OK';
         consoleBox.appendChild(newLine);
     }, 5000);
+};
+
+UiManager.prototype.bindTutorialButtons = function() {
+    var self = this;
+
+    // Los botones del tutorial tienen su propia lógica JS embebida en el HTML
+    // (el IIFE del script tag). Aquí solo sobreescribimos el botón COMENZAR MISIÓN
+    // para que dispare el evento de PlayCanvas correctamente.
+    var btnMission = this.container.querySelector('#btn-start-mission');
+    if (btnMission) {
+        // Clonar para eliminar el listener del script embebido
+        var newBtn = btnMission.cloneNode(true);
+        btnMission.parentNode.replaceChild(newBtn, btnMission);
+        newBtn.addEventListener('click', function() {
+            console.log("Tutorial completado. Iniciando juego...");
+            self.app.fire('menu:startGame');
+        });
+    }
 };
 
 UiManager.prototype.bindTerminalButtons = function() {
