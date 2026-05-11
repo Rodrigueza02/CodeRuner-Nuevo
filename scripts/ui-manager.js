@@ -97,7 +97,7 @@ UiManager.prototype.bindMainMenuButtons = function() {
     }
 
     // Vincular level-cards por ID
-    for (var i = 0; i <= 3; i++) {
+    for (var i = 0; i <= 4; i++) {
         (function(index) {
             var card = self.container.querySelector('#level-' + index);
             if (card) {
