@@ -150,19 +150,41 @@ UiManager.prototype.bindMainMenuButtons = function() {
 UiManager.prototype.bindTutorialButtons = function() {
     var self = this;
 
-    // Los botones del tutorial tienen su propia lógica JS embebida en el HTML
-    // (el IIFE del script tag). Aquí solo sobreescribimos el botón COMENZAR MISIÓN
-    // para que dispare el evento de PlayCanvas correctamente.
-    var btnMission = this.container.querySelector('#btn-start-mission');
-    if (btnMission) {
-        // Clonar para eliminar el listener del script embebido
-        var newBtn = btnMission.cloneNode(true);
-        btnMission.parentNode.replaceChild(newBtn, btnMission);
-        newBtn.addEventListener('click', function() {
-            console.log("Tutorial completado. Iniciando juego...");
-            self.app.fire('menu:startGame');
-        });
+    // El tutorial tiene un IIFE en su <script> tag que maneja
+    // el typewriter y la navegación entre secciones.
+    // Necesitamos ejecutarlo manualmente porque innerHTML no ejecuta scripts.
+    var scripts = this.container.querySelectorAll('script');
+    for (var i = 0; i < scripts.length; i++) {
+        var oldScript = scripts[i];
+        var newScript = document.createElement('script');
+        newScript.textContent = oldScript.textContent;
+        oldScript.parentNode.replaceChild(newScript, oldScript);
     }
+
+    // Sobreescribir el botón COMENZAR MISIÓN para disparar evento PlayCanvas
+    // Usamos setTimeout para esperar a que el IIFE termine de ejecutarse
+    setTimeout(function() {
+        var btnMission = document.getElementById('btn-start-mission');
+        if (btnMission) {
+            var newBtn = btnMission.cloneNode(true);
+            btnMission.parentNode.replaceChild(newBtn, btnMission);
+            newBtn.addEventListener('click', function() {
+                console.log("Tutorial completado. Iniciando juego...");
+                self.app.fire('menu:startGame');
+            });
+        }
+
+        var btnBack = document.getElementById('btn-tutorial-back');
+        if (btnBack) {
+            var newBack = btnBack.cloneNode(true);
+            btnBack.parentNode.replaceChild(newBack, btnBack);
+            newBack.addEventListener('click', function() {
+                // Volver a la sección de historia (ya lo maneja el IIFE)
+                // pero si queremos volver al menú principal:
+                // self.app.fire('menu:backToMain');
+            });
+        }
+    }, 100);
 };
 
 UiManager.prototype.bindTerminalButtons = function() {
@@ -229,9 +251,13 @@ UiManager.prototype.updateLog = function(msg) {
     this.logDisplay.style.animation = 'typing 2s steps(40, end), blink .75s step-end infinite';
 };
 
-// Limpiar eventos cuando se destruye la entidad
+// Limpiar eventos y HTML cuando se destruye la entidad
 UiManager.prototype.onBeforeDestroy = function() {
     this.app.off('ui:mostrarLog', this.onMostrarLog, this);
+    // Remover el HTML inyectado del DOM
+    if (this.container && this.container.parentNode) {
+        this.container.parentNode.removeChild(this.container);
+    }
 };
 
 UiManager.prototype.startEmotionalLogs = function() {

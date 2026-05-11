@@ -31,13 +31,23 @@ SceneManager.prototype.initialize = function() {
 SceneManager.prototype.goToScene = function(sceneUrl, sceneName) {
     console.log('Cargando escena: ' + sceneName + ' (' + sceneUrl + ')');
 
+    // 1. Limpiar TODO el HTML inyectado por uiManager del DOM
+    //    para que no quede el menú visible debajo del tutorial
+    var injected = document.querySelectorAll('body > div');
+    for (var i = 0; i < injected.length; i++) {
+        injected[i].remove();
+    }
+
+    // 2. Guardar referencia a la jerarquía 3D actual
     var currentRoot = this.app.root.findByName('Root');
 
+    // 3. Cargar la nueva escena
     this.app.scenes.loadSceneHierarchy(sceneUrl, function(err, parent) {
         if (err) {
             console.error('Error al cargar "' + sceneName + '": ' + err);
             return;
         }
+        // 4. Destruir la jerarquía 3D anterior
         if (currentRoot) {
             currentRoot.destroy();
         }
