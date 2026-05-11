@@ -539,7 +539,7 @@
     var paraActual = 0;
     var charIdx    = 0;
     var timer      = null;
-    var SPEED      = 35;
+    var SPEED      = 80;
 
     var speechText = document.getElementById('speech-text');
     var cursor     = document.getElementById('cursor');
@@ -578,7 +578,7 @@
                 setTimeout(function () {
                     speechText.innerHTML = '';
                     timer = setInterval(escribir, SPEED);
-                }, 600);
+                }, 1800);
             } else {
                 cursor.style.display = 'none';
                 btnNext.classList.add('show');
