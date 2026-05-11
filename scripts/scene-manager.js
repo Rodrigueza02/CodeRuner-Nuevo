@@ -1,60 +1,46 @@
 var SceneManager = pc.createScript('sceneManager');
 
-SceneManager.attributes.add('tutorialSceneUrl', {
-    type: 'string',
-    default: '',
-    title: 'URL Escena Tutorial'
-});
-
-SceneManager.attributes.add('mainMenuSceneUrl', {
-    type: 'string',
-    default: '',
-    title: 'URL Escena Menu Principal'
-});
-
-SceneManager.attributes.add('level1SceneUrl', {
-    type: 'string',
-    default: '',
-    title: 'URL Escena Nivel 1'
-});
+// IDs de escenas obtenidos desde la URL del editor de PlayCanvas
+// https://playcanvas.com/editor/scene/XXXXXXX
+var SCENES = {
+    menuPrincipal: 'scenes/2489400/scene.json',
+    tutorial:      'scenes/2494415/scene.json',
+    nivel1:        'scenes/2487258/scene.json'
+};
 
 SceneManager.prototype.initialize = function() {
     var self = this;
 
+    // Menú Principal → click Nivel 0 → cargar Tutorial
     this.app.on('menu:loadTutorial', function() {
-        self.goToScene(self.tutorialSceneUrl, 'Tutorial');
+        self.goToScene(SCENES.tutorial, 'Tutorial');
     });
 
+    // Tutorial → COMENZAR MISIÓN → cargar Nivel 1
     this.app.on('menu:startGame', function() {
-        self.goToScene(self.level1SceneUrl, 'Nivel1');
+        self.goToScene(SCENES.nivel1, 'Nivel 1');
     });
 
+    // Cualquier escena → volver al Menú Principal
     this.app.on('menu:backToMain', function() {
-        self.goToScene(self.mainMenuSceneUrl, 'MenuPrincipal');
+        self.goToScene(SCENES.menuPrincipal, 'Menu Principal');
     });
 };
 
-SceneManager.prototype.goToScene = function(url, name) {
-    if (!url || url.trim() === '') {
-        console.error('SceneManager: URL vacio para escena "' + name + '"');
-        return;
-    }
+SceneManager.prototype.goToScene = function(sceneUrl, sceneName) {
+    console.log('Cargando escena: ' + sceneName + ' (' + sceneUrl + ')');
 
-    console.log('Cambiando a escena: ' + name);
-
-    // Guardar referencia a la jerarquia actual ANTES de cargar
+    // Guardar referencia a la jerarquía actual antes de destruirla
     var currentRoot = this.app.root.findByName('Root');
 
-    // PlayCanvas: cargar jerarquia de la nueva escena
-    this.app.scenes.loadSceneHierarchy(url, function(err, parent) {
+    this.app.scenes.loadSceneHierarchy(sceneUrl, function(err, parent) {
         if (err) {
-            console.error('Error al cargar escena "' + name + '": ' + err);
+            console.error('Error al cargar "' + sceneName + '": ' + err);
             return;
         }
-        // Destruir la escena anterior
         if (currentRoot) {
             currentRoot.destroy();
         }
-        console.log('Escena "' + name + '" lista.');
+        console.log('Escena "' + sceneName + '" cargada.');
     });
 };
