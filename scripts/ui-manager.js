@@ -20,10 +20,6 @@ UiManager.prototype.initialize = function() {
         document.body.appendChild(div);
 
         this.container = div;
-
-        // Ejecutar los <script> embebidos en el HTML inyectado
-        // (innerHTML no ejecuta scripts automaticamente)
-        this._executeInlineScripts(div);
         
         // DETECTAR QUÉ INTERFAZ ESTAMOS CARGANDO
         if (div.querySelector('.menu-container')) {
@@ -41,26 +37,6 @@ UiManager.prototype.initialize = function() {
 
     // Escuchar evento de logs narrativos de PlayCanvas (de Helen/Daniel)
     this.app.on('ui:mostrarLog', this.onMostrarLog, this);
-};
-
-/**
- * Ejecuta los tags <script> dentro del HTML inyectado,
- * ya que innerHTML no los ejecuta por seguridad del navegador.
- */
-UiManager.prototype._executeInlineScripts = function(container) {
-    var scripts = container.querySelectorAll('script');
-    for (var i = 0; i < scripts.length; i++) {
-        var oldScript = scripts[i];
-        var newScript = document.createElement('script');
-        for (var j = 0; j < oldScript.attributes.length; j++) {
-            newScript.setAttribute(
-                oldScript.attributes[j].name,
-                oldScript.attributes[j].value
-            );
-        }
-        newScript.textContent = oldScript.textContent;
-        oldScript.parentNode.replaceChild(newScript, oldScript);
-    }
 };
 
 /**
@@ -84,13 +60,12 @@ UiManager.prototype.onMostrarLog = function(logData) {
 
 UiManager.prototype.bindMainMenuButtons = function() {
     var self = this;
-    var btnStart  = this.container.querySelector('.menu-btn.red');
-    var btnLevels = this.container.querySelector('.menu-btn.blue');
-    var btnReset  = this.container.querySelector('.menu-btn.white');
+    var btnStart  = this.container.querySelector('#btn-start');
+    var btnLevels = this.container.querySelector('#btn-levels');
+    var btnReset  = this.container.querySelector('#btn-reset-system');
+    var btnBack   = this.container.querySelector('#btn-back-levels');
 
     if (btnStart) {
-        // Remover el onclick inline y reemplazar con listener
-        btnStart.removeAttribute('onclick');
         btnStart.addEventListener('click', function() {
             console.log("Iniciando Protocolo...");
             self.app.fire('menu:start');
@@ -98,7 +73,6 @@ UiManager.prototype.bindMainMenuButtons = function() {
     }
 
     if (btnLevels) {
-        btnLevels.removeAttribute('onclick');
         btnLevels.addEventListener('click', function() {
             var selector = self.container.querySelector('#level-selector');
             if (selector) {
@@ -108,7 +82,6 @@ UiManager.prototype.bindMainMenuButtons = function() {
     }
 
     if (btnReset) {
-        btnReset.removeAttribute('onclick');
         btnReset.addEventListener('click', function() {
             if (confirm("¿Estás segura de purgar toda la memoria? Esta acción no se puede deshacer.")) {
                 self.app.fire('menu:reset');
@@ -116,17 +89,37 @@ UiManager.prototype.bindMainMenuButtons = function() {
         });
     }
 
-    // Vincular también los level-cards
-    var levelCards = this.container.querySelectorAll('.level-card');
-    for (var i = 0; i < levelCards.length; i++) {
-        (function(card, index) {
-            card.removeAttribute('onclick');
-            card.addEventListener('click', function() {
-                console.log("Accediendo al Nodo de Memoria " + index + "...");
-                self.app.fire('menu:selectLevel', index);
-            });
-        })(levelCards[i], i);
+    if (btnBack) {
+        btnBack.addEventListener('click', function() {
+            var selector = self.container.querySelector('#level-selector');
+            if (selector) selector.style.display = 'none';
+        });
     }
+
+    // Vincular level-cards por ID
+    for (var i = 0; i <= 3; i++) {
+        (function(index) {
+            var card = self.container.querySelector('#level-' + index);
+            if (card) {
+                card.addEventListener('click', function() {
+                    console.log("Accediendo al Nodo de Memoria " + index + "...");
+                    self.app.fire('menu:selectLevel', index);
+                });
+            }
+        })(i);
+    }
+
+    // Simular logs en la consola del menú
+    setInterval(function() {
+        var consoleBox = self.container.querySelector('#console');
+        if (!consoleBox) return;
+        var lines = consoleBox.getElementsByClassName('log-line');
+        if (lines.length > 8) lines[0].remove();
+        var newLine = document.createElement('div');
+        newLine.className = 'log-line';
+        newLine.innerText = '> Monitoreando flujo de datos... OK';
+        consoleBox.appendChild(newLine);
+    }, 5000);
 };
 
 UiManager.prototype.bindTerminalButtons = function() {

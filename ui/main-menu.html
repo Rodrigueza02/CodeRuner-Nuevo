@@ -317,15 +317,15 @@
 
         <!-- BOTONES IZQUIERDA -->
         <div class="sidebar-left">
-            <button class="menu-btn red" onclick="startGame()">
+            <button class="menu-btn red" id="btn-start">
                 <span>INICIAR PROTOCOLO</span>
                 <span class="btn-icon">▶</span>
             </button>
-            <button class="menu-btn blue" onclick="toggleLevels()">
+            <button class="menu-btn blue" id="btn-levels">
                 <span>ACCESO A NIVELES</span>
                 <span class="btn-icon">📂</span>
             </button>
-            <button class="menu-btn white" onclick="resetSystem()">
+            <button class="menu-btn white" id="btn-reset-system">
                 <span>REINICIAR SISTEMA</span>
                 <span class="btn-icon">🔄</span>
             </button>
@@ -361,79 +361,30 @@
     <div class="level-selector" id="level-selector">
         <h2 style="font-size: 40px; letter-spacing: 10px; color: var(--neon-blue);">REGISTROS DE MEMORIA</h2>
         <div class="level-grid">
-            <div class="level-card" onclick="selectLevel(0)">
+            <div class="level-card" id="level-0">
                 <div style="font-size: 12px; opacity: 0.5;">NIVEL 0</div>
                 <div style="font-weight: bold; margin: 15px 0;">DESPERTAR</div>
                 <div style="font-size: 20px;">🔒</div>
             </div>
-            <div class="level-card" onclick="selectLevel(1)">
+            <div class="level-card" id="level-1">
                 <div style="font-size: 12px; opacity: 0.5;">NIVEL 1</div>
                 <div style="font-weight: bold; margin: 15px 0;">NODO PERDIDO</div>
                 <div style="font-size: 20px;">🔒</div>
             </div>
-            <div class="level-card" onclick="selectLevel(2)">
+            <div class="level-card" id="level-2">
                 <div style="font-size: 12px; opacity: 0.5;">NIVEL 2</div>
                 <div style="font-weight: bold; margin: 15px 0;">MEMORIA CORRUPTA</div>
                 <div style="font-size: 20px;">🔒</div>
             </div>
-            <div class="level-card" onclick="selectLevel(3)">
+            <div class="level-card" id="level-3">
                 <div style="font-size: 12px; opacity: 0.5;">NIVEL 3</div>
                 <div style="font-weight: bold; margin: 15px 0;">FIREWALL HUMANO</div>
                 <div style="font-size: 20px;">🔒</div>
             </div>
         </div>
-        <button class="menu-btn white" style="margin-top: 50px; clip-path: none;" onclick="toggleLevels()">VOLVER</button>
+        <button class="menu-btn white" id="btn-back-levels" style="margin-top: 50px; clip-path: none;">VOLVER</button>
     </div>
 
-    <script>
-        // Registrar funciones en window para que estén disponibles
-        // tanto en el HTML standalone como cuando PlayCanvas inyecta el HTML
-        window.startGame = function() {
-            document.body.style.transition = "opacity 1s";
-            document.body.style.opacity = "0";
-            setTimeout(function() {
-                // Avisar a PlayCanvas que cambie de escena
-                if (window.pc && window.pc.app) {
-                    window.pc.app.fire('menu:start');
-                } else {
-                    alert("Protocolo Iniciado. Conectando con la unidad...");
-                }
-            }, 1000);
-        };
 
-        window.toggleLevels = function() {
-            var selector = document.getElementById('level-selector');
-            if (!selector) return;
-            selector.style.display = selector.style.display === 'flex' ? 'none' : 'flex';
-        };
-
-        window.resetSystem = function() {
-            if (confirm("¿Estás segura de purgar toda la memoria? Esta acción no se puede deshacer.")) {
-                // Avisar a PlayCanvas para reiniciar
-                if (window.pc && window.pc.app) {
-                    window.pc.app.fire('menu:reset');
-                } else {
-                    location.reload();
-                }
-            }
-        };
-
-        window.selectLevel = function(n) {
-            alert("Accediendo al Nodo de Memoria " + n + "...");
-        };
-
-        // Simular logs infinitos
-        setInterval(function() {
-            var consoleBox = document.getElementById('console');
-            if (!consoleBox) return;
-            var lines = consoleBox.getElementsByClassName('log-line');
-            if (lines.length > 8) lines[0].remove();
-            
-            var newLine = document.createElement('div');
-            newLine.className = 'log-line';
-            newLine.innerText = "> Monitoreando flujo de datos... OK";
-            consoleBox.appendChild(newLine);
-        }, 5000);
-    </script>
 </body>
 </html>
