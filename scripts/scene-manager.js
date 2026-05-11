@@ -1,11 +1,12 @@
 var SceneManager = pc.createScript('sceneManager');
 
-// IDs de escenas obtenidos desde la URL del editor de PlayCanvas
+// Formato correcto para PlayCanvas: solo "ID.json"
+// IDs obtenidos desde la URL del editor:
 // https://playcanvas.com/editor/scene/XXXXXXX
 var SCENES = {
-    menuPrincipal: 'scenes/2489400/scene.json',
-    tutorial:      'scenes/2494415/scene.json',
-    nivel1:        'scenes/2487258/scene.json'
+    menuPrincipal: '2489400.json',
+    tutorial:      '2494415.json',
+    nivel1:        '2487258.json'
 };
 
 SceneManager.prototype.initialize = function() {
@@ -30,7 +31,6 @@ SceneManager.prototype.initialize = function() {
 SceneManager.prototype.goToScene = function(sceneUrl, sceneName) {
     console.log('Cargando escena: ' + sceneName + ' (' + sceneUrl + ')');
 
-    // Guardar referencia a la jerarquía actual antes de destruirla
     var currentRoot = this.app.root.findByName('Root');
 
     this.app.scenes.loadSceneHierarchy(sceneUrl, function(err, parent) {
