@@ -386,37 +386,50 @@
     </div>
 
     <script>
-        function startGame() {
+        // Registrar funciones en window para que estén disponibles
+        // tanto en el HTML standalone como cuando PlayCanvas inyecta el HTML
+        window.startGame = function() {
             document.body.style.transition = "opacity 1s";
             document.body.style.opacity = "0";
-            setTimeout(() => {
-                // Aquí podrías avisar a PlayCanvas que cambie de escena
-                alert("Protocolo Iniciado. Conectando con la unidad...");
+            setTimeout(function() {
+                // Avisar a PlayCanvas que cambie de escena
+                if (window.pc && window.pc.app) {
+                    window.pc.app.fire('menu:start');
+                } else {
+                    alert("Protocolo Iniciado. Conectando con la unidad...");
+                }
             }, 1000);
-        }
+        };
 
-        function toggleLevels() {
-            const selector = document.getElementById('level-selector');
+        window.toggleLevels = function() {
+            var selector = document.getElementById('level-selector');
+            if (!selector) return;
             selector.style.display = selector.style.display === 'flex' ? 'none' : 'flex';
-        }
+        };
 
-        function resetSystem() {
-            if(confirm("¿Estás segura de purgar toda la memoria? Esta acción no se puede deshacer.")) {
-                location.reload();
+        window.resetSystem = function() {
+            if (confirm("¿Estás segura de purgar toda la memoria? Esta acción no se puede deshacer.")) {
+                // Avisar a PlayCanvas para reiniciar
+                if (window.pc && window.pc.app) {
+                    window.pc.app.fire('menu:reset');
+                } else {
+                    location.reload();
+                }
             }
-        }
+        };
 
-        function selectLevel(n) {
+        window.selectLevel = function(n) {
             alert("Accediendo al Nodo de Memoria " + n + "...");
-        }
+        };
 
         // Simular logs infinitos
-        setInterval(() => {
-            const consoleBox = document.getElementById('console');
-            const lines = consoleBox.getElementsByClassName('log-line');
+        setInterval(function() {
+            var consoleBox = document.getElementById('console');
+            if (!consoleBox) return;
+            var lines = consoleBox.getElementsByClassName('log-line');
             if (lines.length > 8) lines[0].remove();
             
-            const newLine = document.createElement('div');
+            var newLine = document.createElement('div');
             newLine.className = 'log-line';
             newLine.innerText = "> Monitoreando flujo de datos... OK";
             consoleBox.appendChild(newLine);

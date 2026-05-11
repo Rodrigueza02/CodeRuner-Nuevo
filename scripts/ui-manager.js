@@ -20,6 +20,10 @@ UiManager.prototype.initialize = function() {
         document.body.appendChild(div);
 
         this.container = div;
+
+        // Ejecutar los <script> embebidos en el HTML inyectado
+        // (innerHTML no ejecuta scripts automaticamente)
+        this._executeInlineScripts(div);
         
         // DETECTAR QUÉ INTERFAZ ESTAMOS CARGANDO
         if (div.querySelector('.menu-container')) {
@@ -34,28 +38,94 @@ UiManager.prototype.initialize = function() {
             this.startEmotionalLogs();
         }
     }
+
+    // Escuchar evento de logs narrativos de PlayCanvas (de Helen/Daniel)
+    this.app.on('ui:mostrarLog', this.onMostrarLog, this);
+};
+
+/**
+ * Ejecuta los tags <script> dentro del HTML inyectado,
+ * ya que innerHTML no los ejecuta por seguridad del navegador.
+ */
+UiManager.prototype._executeInlineScripts = function(container) {
+    var scripts = container.querySelectorAll('script');
+    for (var i = 0; i < scripts.length; i++) {
+        var oldScript = scripts[i];
+        var newScript = document.createElement('script');
+        for (var j = 0; j < oldScript.attributes.length; j++) {
+            newScript.setAttribute(
+                oldScript.attributes[j].name,
+                oldScript.attributes[j].value
+            );
+        }
+        newScript.textContent = oldScript.textContent;
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+    }
+};
+
+/**
+ * Recibe un evento de log narrativo desde PlayCanvas y
+ * lo muestra como notificacion en la UI.
+ * logData: { titulo, mensaje, tipo, icono, duracion }
+ */
+UiManager.prototype.onMostrarLog = function(logData) {
+    if (!logData) return;
+
+    // Si la terminal esta activa, usar su funcion de notificaciones
+    if (typeof window.recibirLogPlayCanvas === 'function') {
+        window.recibirLogPlayCanvas(logData);
+        return;
+    }
+
+    // Fallback: disparar evento DOM para que el HTML lo capture
+    var event = new CustomEvent('ui:mostrarLog', { detail: logData });
+    window.dispatchEvent(event);
 };
 
 UiManager.prototype.bindMainMenuButtons = function() {
     var self = this;
-    var btnStart = this.container.querySelector('.menu-btn.red');
+    var btnStart  = this.container.querySelector('.menu-btn.red');
     var btnLevels = this.container.querySelector('.menu-btn.blue');
+    var btnReset  = this.container.querySelector('.menu-btn.white');
 
     if (btnStart) {
+        // Remover el onclick inline y reemplazar con listener
+        btnStart.removeAttribute('onclick');
         btnStart.addEventListener('click', function() {
             console.log("Iniciando Protocolo...");
-            // Aquí puedes disparar un evento para cambiar de escena
             self.app.fire('menu:start');
         });
     }
 
     if (btnLevels) {
+        btnLevels.removeAttribute('onclick');
         btnLevels.addEventListener('click', function() {
             var selector = self.container.querySelector('#level-selector');
             if (selector) {
                 selector.style.display = (selector.style.display === 'flex') ? 'none' : 'flex';
             }
         });
+    }
+
+    if (btnReset) {
+        btnReset.removeAttribute('onclick');
+        btnReset.addEventListener('click', function() {
+            if (confirm("¿Estás segura de purgar toda la memoria? Esta acción no se puede deshacer.")) {
+                self.app.fire('menu:reset');
+            }
+        });
+    }
+
+    // Vincular también los level-cards
+    var levelCards = this.container.querySelectorAll('.level-card');
+    for (var i = 0; i < levelCards.length; i++) {
+        (function(card, index) {
+            card.removeAttribute('onclick');
+            card.addEventListener('click', function() {
+                console.log("Accediendo al Nodo de Memoria " + index + "...");
+                self.app.fire('menu:selectLevel', index);
+            });
+        })(levelCards[i], i);
     }
 };
 
@@ -121,6 +191,11 @@ UiManager.prototype.updateLog = function(msg) {
     this.logDisplay.offsetHeight; // reflow
     this.logDisplay.innerText = "> " + msg;
     this.logDisplay.style.animation = 'typing 2s steps(40, end), blink .75s step-end infinite';
+};
+
+// Limpiar eventos cuando se destruye la entidad
+UiManager.prototype.onBeforeDestroy = function() {
+    this.app.off('ui:mostrarLog', this.onMostrarLog, this);
 };
 
 UiManager.prototype.startEmotionalLogs = function() {
