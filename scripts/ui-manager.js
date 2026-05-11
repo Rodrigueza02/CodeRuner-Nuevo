@@ -79,7 +79,15 @@ UiManager.prototype.bindMainMenuButtons = function() {
         btnLevels.addEventListener('click', function() {
             var selector = self.container.querySelector('#level-selector');
             if (selector) {
-                selector.style.display = (selector.style.display === 'flex') ? 'none' : 'flex';
+                var isOpen = selector.style.display === 'flex';
+                selector.style.display = isOpen ? 'none' : 'flex';
+
+                // Cuando el selector está abierto, desactivar el canvas de PlayCanvas
+                // para que no bloquee los clicks en las cards
+                var canvas = document.querySelector('canvas');
+                if (canvas) {
+                    canvas.style.pointerEvents = isOpen ? 'auto' : 'none';
+                }
             }
         });
     }
@@ -96,6 +104,9 @@ UiManager.prototype.bindMainMenuButtons = function() {
         btnBack.addEventListener('click', function() {
             var selector = self.container.querySelector('#level-selector');
             if (selector) selector.style.display = 'none';
+            // Restaurar canvas
+            var canvas = document.querySelector('canvas');
+            if (canvas) canvas.style.pointerEvents = 'auto';
         });
     }
 
@@ -106,8 +117,14 @@ UiManager.prototype.bindMainMenuButtons = function() {
             if (card) {
                 card.addEventListener('click', function() {
                     console.log("Accediendo al Nodo de Memoria " + index + "...");
+
+                    // Cerrar selector y restaurar canvas
+                    var selector = self.container.querySelector('#level-selector');
+                    if (selector) selector.style.display = 'none';
+                    var canvas = document.querySelector('canvas');
+                    if (canvas) canvas.style.pointerEvents = 'auto';
+
                     if (index === 0) {
-                        // Nivel 0 = Tutorial / Introducción
                         self.app.fire('menu:loadTutorial');
                     } else {
                         self.app.fire('menu:selectLevel', index);
