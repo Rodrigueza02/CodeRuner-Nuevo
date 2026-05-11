@@ -106,7 +106,12 @@ UiManager.prototype.bindMainMenuButtons = function() {
             if (card) {
                 card.addEventListener('click', function() {
                     console.log("Accediendo al Nodo de Memoria " + index + "...");
-                    self.app.fire('menu:selectLevel', index);
+                    if (index === 0) {
+                        // Nivel 0 = Tutorial / Introducción
+                        self.app.fire('menu:loadTutorial');
+                    } else {
+                        self.app.fire('menu:selectLevel', index);
+                    }
                 });
             }
         })(i);
