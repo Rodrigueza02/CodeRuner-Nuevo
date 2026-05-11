@@ -5,7 +5,7 @@ UiManager.attributes.add('cssAsset', { type: 'asset', assetType: 'css', title: '
 
 UiManager.prototype.initialize = function() {
     this.queue = [];
-    
+
     // Inyectar CSS
     if (this.cssAsset) {
         var style = document.createElement('style');
@@ -35,6 +35,7 @@ UiManager.prototype.initialize = function() {
             this.logDisplay = div.querySelector('#log-display');
             this.bindTerminalButtons();
             this.startEmotionalLogs();
+            this.setupGameViewCanvas(div);
         }
     }
 
@@ -276,4 +277,50 @@ UiManager.prototype.startEmotionalLogs = function() {
             self.updateLog(msg);
         }
     }, 15000);
+};
+
+// Mueve el canvas de PlayCanvas dentro del panel izquierdo
+// y lo contiene para que el fondo espacial HTML quede visible
+UiManager.prototype.setupGameViewCanvas = function(div) {
+    var gameView = div.querySelector('.game-view-reference');
+    if (!gameView) return;
+
+    // El canvas de PlayCanvas está en el body, cubre toda la pantalla
+    var pcCanvas = document.querySelector('canvas');
+    if (!pcCanvas) return;
+
+    // Mover el canvas dentro del game-view-reference
+    gameView.appendChild(pcCanvas);
+
+    // Hacer que el canvas ocupe solo el panel izquierdo
+    pcCanvas.style.position = 'absolute';
+    pcCanvas.style.top = '0';
+    pcCanvas.style.left = '0';
+    pcCanvas.style.width = '100%';
+    pcCanvas.style.height = '100%';
+    pcCanvas.style.zIndex = '1';   // encima del fondo espacial (z-index: 0)
+    pcCanvas.style.pointerEvents = 'auto';
+
+    // Permitir que el game-view-reference reciba clicks (para el robot)
+    gameView.style.pointerEvents = 'auto';
+
+    // Desactivar el auto-resize de PlayCanvas y forzar el tamaño del panel
+    this.app.setCanvasFillMode(pc.FILLMODE_NONE);
+    this.app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+    function resizeCanvas() {
+        var w = gameView.offsetWidth;
+        var h = gameView.offsetHeight;
+        if (w > 0 && h > 0) {
+            pcCanvas.width  = w;
+            pcCanvas.height = h;
+            pcCanvas.style.width  = w + 'px';
+            pcCanvas.style.height = h + 'px';
+        }
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    console.log('[UiManager] Canvas de PlayCanvas movido al panel izquierdo');
 };

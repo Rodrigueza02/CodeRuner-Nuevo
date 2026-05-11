@@ -41,26 +41,12 @@
             pointer-events: none;
         }
 
-        /* Fondo de Servidores (Simulado con degradados y formas) */
-        .background-scene {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, #1a1c25 0%, #050608 100%);
-            display: flex;
-            justify-content: space-around;
-            padding: 0 5%;
-            box-sizing: border-box;
-            opacity: 0.5;
-        }
-
-        .server-rack {
-            width: 15%;
-            height: 100%;
-            background: linear-gradient(90deg, #111 0%, #222 50%, #111 100%);
-            border-left: 1px solid rgba(0, 210, 255, 0.1);
-            border-right: 1px solid rgba(0, 210, 255, 0.1);
-            position: relative;
+        /* ── Fondo espacio destruido ── */
+        #space-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
         }
 
         /* Partículas Flotantes */
@@ -309,13 +295,8 @@
 
     <div class="scanlines"></div>
 
-    <div class="background-scene">
-        <div class="server-rack"></div>
-        <div class="server-rack" style="opacity: 0.3;"></div>
-        <div class="server-rack"></div>
-        <div class="server-rack" style="opacity: 0.3;"></div>
-        <div class="server-rack"></div>
-    </div>
+    <!-- FONDO: Espacio futuro destruido -->
+    <canvas id="space-canvas"></canvas>
 
     <div class="menu-container">
         <!-- TÍTULO -->
@@ -400,6 +381,270 @@
         <button class="menu-btn white" id="btn-back-levels" style="margin-top: 50px; clip-path: none;">VOLVER</button>
     </div>
 
+
+
+<script>
+// ══════════════════════════════════════════════════════
+//  FONDO: ESPACIO FUTURO DESTRUIDO — Canvas animado
+// ══════════════════════════════════════════════════════
+(function () {
+    var canvas = document.getElementById('space-canvas');
+    var ctx    = canvas.getContext('2d');
+    var W, H;
+
+    // ── Resize ──────────────────────────────────────────
+    function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // ── Estrellas ────────────────────────────────────────
+    var STAR_COUNT = 280;
+    var stars = [];
+    for (var i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random(),
+            y: Math.random(),
+            r: Math.random() * 1.8 + 0.2,
+            speed: Math.random() * 0.00015 + 0.00005,
+            alpha: Math.random() * 0.6 + 0.4,
+            twinkle: Math.random() * Math.PI * 2
+        });
+    }
+
+    // ── Escombros / Debris ───────────────────────────────
+    var DEBRIS_COUNT = 22;
+    var debris = [];
+    function makeDebris() {
+        return {
+            x: Math.random() * W,
+            y: Math.random() * H,
+            w: Math.random() * 60 + 10,
+            h: Math.random() * 18 + 4,
+            angle: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.008,
+            vx: (Math.random() - 0.5) * 0.25,
+            vy: (Math.random() - 0.5) * 0.12,
+            alpha: Math.random() * 0.35 + 0.08,
+            color: Math.random() > 0.5 ? '#00d2ff' : '#ff3131',
+            type: Math.floor(Math.random() * 3) // 0=rect, 1=tri, 2=line
+        };
+    }
+    for (var d = 0; d < DEBRIS_COUNT; d++) debris.push(makeDebris());
+
+    // ── Partículas de energía ────────────────────────────
+    var PARTICLE_COUNT = 55;
+    var particles = [];
+    function makeParticle() {
+        return {
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 3 + 1,
+            vx: (Math.random() - 0.5) * 0.6,
+            vy: (Math.random() - 0.5) * 0.6,
+            alpha: Math.random() * 0.7 + 0.2,
+            color: ['#00d2ff','#ff3131','#b44fff','#ffffff'][Math.floor(Math.random()*4)],
+            life: Math.random()
+        };
+    }
+    for (var p = 0; p < PARTICLE_COUNT; p++) particles.push(makeParticle());
+
+    // ── Líneas de grid holográfico ───────────────────────
+    var GRID_LINES = 8;
+
+    // ── Planeta destruido (fondo) ────────────────────────
+    var planet = {
+        x: 0.78, y: 0.72,
+        r: 160,
+        pulse: 0
+    };
+
+    // ── Tiempo ───────────────────────────────────────────
+    var t = 0;
+
+    // ── Dibujar ──────────────────────────────────────────
+    function draw() {
+        t += 0.012;
+
+        // Fondo base — negro profundo con gradiente
+        var bg = ctx.createRadialGradient(W * 0.5, H * 0.4, 0, W * 0.5, H * 0.4, W * 0.8);
+        bg.addColorStop(0,   '#0a0a1a');
+        bg.addColorStop(0.5, '#050510');
+        bg.addColorStop(1,   '#000005');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Nebulosa 1 — roja/naranja (destrucción)
+        var neb1 = ctx.createRadialGradient(W * 0.15, H * 0.3, 0, W * 0.15, H * 0.3, W * 0.45);
+        neb1.addColorStop(0,   'rgba(255,49,49,0.12)');
+        neb1.addColorStop(0.4, 'rgba(255,100,0,0.06)');
+        neb1.addColorStop(1,   'transparent');
+        ctx.fillStyle = neb1;
+        ctx.fillRect(0, 0, W, H);
+
+        // Nebulosa 2 — azul/morado (tecnología)
+        var neb2 = ctx.createRadialGradient(W * 0.85, H * 0.2, 0, W * 0.85, H * 0.2, W * 0.5);
+        neb2.addColorStop(0,   'rgba(0,210,255,0.10)');
+        neb2.addColorStop(0.5, 'rgba(180,79,255,0.05)');
+        neb2.addColorStop(1,   'transparent');
+        ctx.fillStyle = neb2;
+        ctx.fillRect(0, 0, W, H);
+
+        // Planeta destruido
+        planet.pulse = Math.sin(t * 0.7) * 0.04;
+        var pr = planet.r * (1 + planet.pulse);
+        var pg = ctx.createRadialGradient(
+            W * planet.x - pr * 0.2, H * planet.y - pr * 0.2, pr * 0.1,
+            W * planet.x, H * planet.y, pr
+        );
+        pg.addColorStop(0,   'rgba(80,30,10,0.55)');
+        pg.addColorStop(0.4, 'rgba(40,10,5,0.40)');
+        pg.addColorStop(0.7, 'rgba(20,5,2,0.20)');
+        pg.addColorStop(1,   'transparent');
+        ctx.beginPath();
+        ctx.arc(W * planet.x, H * planet.y, pr, 0, Math.PI * 2);
+        ctx.fillStyle = pg;
+        ctx.fill();
+        // Anillo roto del planeta
+        ctx.save();
+        ctx.translate(W * planet.x, H * planet.y);
+        ctx.rotate(0.4);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, pr * 1.55, pr * 0.28, 0, 0.3, Math.PI * 1.7);
+        ctx.strokeStyle = 'rgba(255,80,30,0.18)';
+        ctx.lineWidth = 14;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(0, 0, pr * 1.55, pr * 0.28, 0, Math.PI * 1.9, Math.PI * 2.8);
+        ctx.strokeStyle = 'rgba(255,120,50,0.10)';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+        ctx.restore();
+
+        // Grid holográfico (perspectiva)
+        ctx.save();
+        ctx.globalAlpha = 0.06 + Math.sin(t * 0.5) * 0.02;
+        ctx.strokeStyle = '#00d2ff';
+        ctx.lineWidth = 0.8;
+        var gridY = H * 0.55;
+        var vanishX = W * 0.5;
+        for (var g = 0; g <= GRID_LINES; g++) {
+            var gx = (g / GRID_LINES) * W;
+            ctx.beginPath();
+            ctx.moveTo(gx, H);
+            ctx.lineTo(vanishX + (gx - vanishX) * 0.05, gridY);
+            ctx.stroke();
+        }
+        for (var row = 0; row <= 6; row++) {
+            var gy = gridY + (H - gridY) * (row / 6);
+            var spread = (gy - gridY) / (H - gridY);
+            ctx.beginPath();
+            ctx.moveTo(vanishX - spread * W * 0.5, gy);
+            ctx.lineTo(vanishX + spread * W * 0.5, gy);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // Estrellas
+        for (var s = 0; s < stars.length; s++) {
+            var st = stars[s];
+            st.twinkle += 0.04;
+            var tw = 0.5 + 0.5 * Math.sin(st.twinkle);
+            ctx.beginPath();
+            ctx.arc(st.x * W, st.y * H, st.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,' + (st.alpha * tw) + ')';
+            ctx.fill();
+            // Paralaje lento
+            st.x += st.speed;
+            if (st.x > 1) st.x = 0;
+        }
+
+        // Escombros flotantes
+        for (var di = 0; di < debris.length; di++) {
+            var db = debris[di];
+            db.angle += db.rotSpeed;
+            db.x += db.vx;
+            db.y += db.vy;
+            if (db.x < -100) db.x = W + 50;
+            if (db.x > W + 100) db.x = -50;
+            if (db.y < -100) db.y = H + 50;
+            if (db.y > H + 100) db.y = -50;
+
+            ctx.save();
+            ctx.translate(db.x, db.y);
+            ctx.rotate(db.angle);
+            ctx.globalAlpha = db.alpha;
+            ctx.strokeStyle = db.color;
+            ctx.lineWidth = 1.5;
+
+            if (db.type === 0) {
+                ctx.strokeRect(-db.w / 2, -db.h / 2, db.w, db.h);
+            } else if (db.type === 1) {
+                ctx.beginPath();
+                ctx.moveTo(0, -db.h);
+                ctx.lineTo(db.w / 2, db.h);
+                ctx.lineTo(-db.w / 2, db.h);
+                ctx.closePath();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(-db.w / 2, 0);
+                ctx.lineTo(db.w / 2, 0);
+                ctx.moveTo(0, -db.h / 2);
+                ctx.lineTo(0, db.h / 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // Partículas de energía
+        for (var pi = 0; pi < particles.length; pi++) {
+            var par = particles[pi];
+            par.x += par.vx;
+            par.y += par.vy;
+            par.life -= 0.004;
+            if (par.life <= 0 || par.x < 0 || par.x > W || par.y < 0 || par.y > H) {
+                particles[pi] = makeParticle();
+                particles[pi].x = Math.random() * W;
+                particles[pi].y = Math.random() * H;
+                continue;
+            }
+            ctx.beginPath();
+            ctx.arc(par.x, par.y, par.r * par.life, 0, Math.PI * 2);
+            ctx.fillStyle = par.color.replace(')', ',' + (par.alpha * par.life) + ')').replace('rgb', 'rgba');
+            // Fallback para colores hex
+            ctx.globalAlpha = par.alpha * par.life;
+            ctx.fillStyle = par.color;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        // Rayos de energía ocasionales
+        if (Math.sin(t * 3.1) > 0.97) {
+            var rx1 = Math.random() * W;
+            var ry1 = 0;
+            var rx2 = rx1 + (Math.random() - 0.5) * 200;
+            var ry2 = H * 0.4;
+            var rg = ctx.createLinearGradient(rx1, ry1, rx2, ry2);
+            rg.addColorStop(0, 'rgba(255,49,49,0)');
+            rg.addColorStop(0.5, 'rgba(255,49,49,0.4)');
+            rg.addColorStop(1, 'rgba(255,49,49,0)');
+            ctx.beginPath();
+            ctx.moveTo(rx1, ry1);
+            ctx.lineTo(rx2, ry2);
+            ctx.strokeStyle = rg;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+})();
+</script>
 
 </body>
 </html>

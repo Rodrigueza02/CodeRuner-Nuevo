@@ -39,8 +39,27 @@
             flex: 1;
             border-right: 2px solid rgba(0, 210, 255, 0.2);
             position: relative;
-            background: transparent; /* AHORA ES TRANSPARENTE */
-            pointer-events: none; /* Los clics pasan al juego */
+            background: #000005;   /* negro casi puro — base para el blend */
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* Canvas del fondo espacial — ENCIMA del canvas de PlayCanvas
+           pero con pointer-events: none para no bloquear el juego.
+           PlayCanvas pinta negro, este canvas pinta el espacio
+           solo en las zonas donde no hay geometría 3D.
+           Como PlayCanvas pinta negro sólido, usamos mix-blend-mode
+           para que el negro de PlayCanvas se vea como transparente. */
+        #space-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            /* screen: el negro (0,0,0) de PlayCanvas se vuelve transparente,
+               los colores del espacio se suman al render 3D */
+            mix-blend-mode: screen;
         }
 
         /* Foco Principal: La Terminal */
@@ -459,7 +478,8 @@
     <div class="main-wrapper">
         <!-- ÁREA DE JUEGO (Referencia) -->
         <div class="game-view-reference">
-            <div style="position: absolute; top: 20px; left: 20px; color: rgba(0,210,255,0.5); font-size: 12px;">
+            <canvas id="space-bg"></canvas>
+            <div style="position: absolute; top: 20px; left: 20px; color: rgba(0,210,255,0.5); font-size: 12px; z-index: 1;">
                 VISTA_DEL_SISTEMA: ACTIVA
             </div>
         </div>
@@ -633,6 +653,214 @@
         window.addEventListener('ui:mostrarLog', function(e) {
             if (e.detail) window.recibirLogPlayCanvas(e.detail);
         });
+    </script>
+
+    <script>
+    // ══════════════════════════════════════════════════════════
+    //  FONDO: ESPACIO FUTURO DESTRUIDO
+    //  Se dibuja en el área izquierda (game-view-reference)
+    // ══════════════════════════════════════════════════════════
+    (function () {
+        var canvas = document.getElementById('space-bg');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var W, H;
+
+        function resize() {
+            var parent = canvas.parentElement;
+            W = canvas.width  = parent.offsetWidth;
+            H = canvas.height = parent.offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        // Esperar a que el DOM esté listo para medir el contenedor
+        setTimeout(resize, 50);
+
+        // ── Estrellas ──────────────────────────────────────────
+        var stars = [];
+        for (var i = 0; i < 220; i++) {
+            stars.push({
+                x: Math.random(), y: Math.random(),
+                r: Math.random() * 1.6 + 0.2,
+                speed: Math.random() * 0.00012 + 0.00004,
+                alpha: Math.random() * 0.6 + 0.4,
+                twinkle: Math.random() * Math.PI * 2
+            });
+        }
+
+        // ── Escombros flotantes ────────────────────────────────
+        var debris = [];
+        function mkDebris() {
+            return {
+                x: Math.random() * (W || 500), y: Math.random() * (H || 400),
+                w: Math.random() * 55 + 8, h: Math.random() * 16 + 3,
+                angle: Math.random() * Math.PI * 2,
+                rot: (Math.random() - 0.5) * 0.009,
+                vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.10,
+                alpha: Math.random() * 0.30 + 0.07,
+                color: Math.random() > 0.5 ? '#00d2ff' : '#ff3131',
+                type: Math.floor(Math.random() * 3)
+            };
+        }
+        for (var d = 0; d < 18; d++) debris.push(mkDebris());
+
+        // ── Partículas ─────────────────────────────────────────
+        var particles = [];
+        function mkParticle() {
+            return {
+                x: Math.random() * (W || 500), y: Math.random() * (H || 400),
+                r: Math.random() * 2.5 + 0.8,
+                vx: (Math.random() - 0.5) * 0.55, vy: (Math.random() - 0.5) * 0.55,
+                alpha: Math.random() * 0.65 + 0.2,
+                color: ['#00d2ff','#ff3131','#b44fff','#ffffff'][Math.floor(Math.random()*4)],
+                life: Math.random() * 0.8 + 0.2
+            };
+        }
+        for (var p = 0; p < 45; p++) particles.push(mkParticle());
+
+        // ── Planeta destruido ──────────────────────────────────
+        var planet = { x: 0.80, y: 0.75, r: 110, pulse: 0 };
+
+        var t = 0;
+
+        function draw() {
+            if (!W || !H) { requestAnimationFrame(draw); return; }
+            t += 0.012;
+
+            // Fondo negro profundo
+            var bg = ctx.createRadialGradient(W*.5, H*.4, 0, W*.5, H*.4, W*.9);
+            bg.addColorStop(0, '#0a0a1a');
+            bg.addColorStop(0.5, '#050510');
+            bg.addColorStop(1, '#000005');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
+
+            // Nebulosa roja — destrucción
+            var n1 = ctx.createRadialGradient(W*.1, H*.25, 0, W*.1, H*.25, W*.5);
+            n1.addColorStop(0, 'rgba(255,49,49,0.13)');
+            n1.addColorStop(0.4, 'rgba(255,100,0,0.06)');
+            n1.addColorStop(1, 'transparent');
+            ctx.fillStyle = n1; ctx.fillRect(0, 0, W, H);
+
+            // Nebulosa azul/morada — tecnología
+            var n2 = ctx.createRadialGradient(W*.9, H*.15, 0, W*.9, H*.15, W*.55);
+            n2.addColorStop(0, 'rgba(0,210,255,0.10)');
+            n2.addColorStop(0.5, 'rgba(180,79,255,0.05)');
+            n2.addColorStop(1, 'transparent');
+            ctx.fillStyle = n2; ctx.fillRect(0, 0, W, H);
+
+            // Planeta destruido
+            planet.pulse = Math.sin(t * 0.7) * 0.04;
+            var pr = planet.r * (1 + planet.pulse);
+            var pg = ctx.createRadialGradient(
+                W*planet.x - pr*.2, H*planet.y - pr*.2, pr*.1,
+                W*planet.x, H*planet.y, pr
+            );
+            pg.addColorStop(0, 'rgba(80,30,10,0.55)');
+            pg.addColorStop(0.4, 'rgba(40,10,5,0.40)');
+            pg.addColorStop(0.7, 'rgba(20,5,2,0.20)');
+            pg.addColorStop(1, 'transparent');
+            ctx.beginPath();
+            ctx.arc(W*planet.x, H*planet.y, pr, 0, Math.PI*2);
+            ctx.fillStyle = pg; ctx.fill();
+            // Anillo roto
+            ctx.save();
+            ctx.translate(W*planet.x, H*planet.y);
+            ctx.rotate(0.4);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, pr*1.5, pr*0.26, 0, 0.3, Math.PI*1.7);
+            ctx.strokeStyle = 'rgba(255,80,30,0.18)'; ctx.lineWidth = 12; ctx.stroke();
+            ctx.restore();
+
+            // Grid holográfico perspectiva
+            ctx.save();
+            ctx.globalAlpha = 0.055 + Math.sin(t*.5)*.018;
+            ctx.strokeStyle = '#00d2ff'; ctx.lineWidth = 0.7;
+            var gy = H * 0.58, vx = W * 0.5;
+            for (var g = 0; g <= 8; g++) {
+                var gx = (g/8)*W;
+                ctx.beginPath(); ctx.moveTo(gx, H);
+                ctx.lineTo(vx + (gx-vx)*0.05, gy); ctx.stroke();
+            }
+            for (var row = 0; row <= 5; row++) {
+                var ry = gy + (H-gy)*(row/5);
+                var sp = (ry-gy)/(H-gy);
+                ctx.beginPath();
+                ctx.moveTo(vx - sp*W*.5, ry);
+                ctx.lineTo(vx + sp*W*.5, ry); ctx.stroke();
+            }
+            ctx.restore();
+
+            // Estrellas
+            for (var s = 0; s < stars.length; s++) {
+                var st = stars[s];
+                st.twinkle += 0.04;
+                var tw = 0.5 + 0.5*Math.sin(st.twinkle);
+                ctx.beginPath();
+                ctx.arc(st.x*W, st.y*H, st.r, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(255,255,255,'+(st.alpha*tw)+')';
+                ctx.fill();
+                st.x += st.speed; if (st.x > 1) st.x = 0;
+            }
+
+            // Escombros
+            for (var di = 0; di < debris.length; di++) {
+                var db = debris[di];
+                db.angle += db.rot; db.x += db.vx; db.y += db.vy;
+                if (db.x < -80) db.x = W+40;
+                if (db.x > W+80) db.x = -40;
+                if (db.y < -80) db.y = H+40;
+                if (db.y > H+80) db.y = -40;
+                ctx.save();
+                ctx.translate(db.x, db.y); ctx.rotate(db.angle);
+                ctx.globalAlpha = db.alpha;
+                ctx.strokeStyle = db.color; ctx.lineWidth = 1.4;
+                if (db.type === 0) {
+                    ctx.strokeRect(-db.w/2, -db.h/2, db.w, db.h);
+                } else if (db.type === 1) {
+                    ctx.beginPath(); ctx.moveTo(0,-db.h);
+                    ctx.lineTo(db.w/2,db.h); ctx.lineTo(-db.w/2,db.h);
+                    ctx.closePath(); ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(-db.w/2,0); ctx.lineTo(db.w/2,0);
+                    ctx.moveTo(0,-db.h/2); ctx.lineTo(0,db.h/2);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            // Partículas
+            for (var pi = 0; pi < particles.length; pi++) {
+                var par = particles[pi];
+                par.x += par.vx; par.y += par.vy; par.life -= 0.004;
+                if (par.life <= 0 || par.x<0 || par.x>W || par.y<0 || par.y>H) {
+                    particles[pi] = mkParticle();
+                    continue;
+                }
+                ctx.beginPath();
+                ctx.arc(par.x, par.y, par.r*par.life, 0, Math.PI*2);
+                ctx.globalAlpha = par.alpha * par.life;
+                ctx.fillStyle = par.color; ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            // Rayos de energía ocasionales
+            if (Math.sin(t*3.1) > 0.97) {
+                var rx1 = Math.random()*W, ry1 = 0;
+                var rx2 = rx1 + (Math.random()-0.5)*180, ry2 = H*0.4;
+                var rg = ctx.createLinearGradient(rx1,ry1,rx2,ry2);
+                rg.addColorStop(0,'rgba(255,49,49,0)');
+                rg.addColorStop(0.5,'rgba(255,49,49,0.4)');
+                rg.addColorStop(1,'rgba(255,49,49,0)');
+                ctx.beginPath(); ctx.moveTo(rx1,ry1); ctx.lineTo(rx2,ry2);
+                ctx.strokeStyle = rg; ctx.lineWidth = 1.5; ctx.stroke();
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    })();
     </script>
 
 </body>
