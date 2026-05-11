@@ -5,372 +5,289 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CODE RUNNER - Tutorial</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@800;900&display=swap');
 
         :root {
-            --neon-red:   #ff3131;
-            --neon-blue:  #00d2ff;
-            --neon-green: #00ff88;
-            --neon-white: #ffffff;
-            --bg-dark:    #050608;
-            --glass-bg:   rgba(0, 210, 255, 0.05);
+            --amarillo:  #FFD600;
+            --naranja:   #FF6B00;
+            --rosa:      #FF3CAC;
+            --azul:      #00D2FF;
+            --verde:     #00FF88;
+            --morado:    #B44FFF;
+            --rojo:      #FF3131;
+            --bg:        #0D0D1A;
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-dark);
-            font-family: 'Orbitron', sans-serif;
+            width: 100%; height: 100%;
+            background: var(--bg);
+            font-family: 'Fredoka One', cursive;
             color: white;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        /* ── Scanlines ── */
-        .scanlines {
-            position: fixed;
-            inset: 0;
+        /* ── Fondo animado con estrellas ── */
+        .stars {
+            position: fixed; inset: 0; z-index: 0;
             background:
-                linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.12) 50%),
-                linear-gradient(90deg, rgba(255,0,0,0.02), rgba(0,255,0,0.01), rgba(0,0,255,0.02));
-            background-size: 100% 4px, 3px 100%;
-            z-index: 100;
-            pointer-events: none;
+                radial-gradient(ellipse at 20% 50%, rgba(0,210,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(180,79,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 60% 80%, rgba(255,60,172,0.06) 0%, transparent 50%);
         }
 
-        /* ── Background ── */
-        .background-scene {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at center, #1a1c25 0%, #050608 100%);
-            display: flex;
-            justify-content: space-around;
-            padding: 0 5%;
-            opacity: 0.45;
-            z-index: 0;
-        }
-
-        .server-rack {
-            width: 15%;
-            height: 100%;
-            background: linear-gradient(90deg, #111 0%, #222 50%, #111 100%);
-            border-left:  1px solid rgba(0,210,255,0.1);
-            border-right: 1px solid rgba(0,210,255,0.1);
-        }
-
-        /* ── Main wrapper ── */
         .scene-wrapper {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative; z-index: 1;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* ══════════════════════════════════════
-           SECTION 1 — LA HISTORIA DE C-R01
-        ══════════════════════════════════════ */
+        /* ════════════════════════════════
+           SECCIÓN 1 — HISTORIA
+        ════════════════════════════════ */
         #section-story {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            height: 100%;
-            padding: 40px 20px;
-            gap: 30px;
+            width: 100%; height: 100%;
+            padding: 20px;
+            gap: 16px;
         }
 
-        .story-header {
+        .story-title {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: clamp(28px, 5vw, 52px);
             text-align: center;
+            background: linear-gradient(90deg, var(--amarillo), var(--naranja), var(--rosa));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(255,107,0,0.6));
+            line-height: 1.1;
         }
 
-        .story-header h2 {
-            font-size: clamp(18px, 3vw, 32px);
-            letter-spacing: 8px;
-            color: var(--neon-blue);
-            margin: 0 0 6px;
-            text-shadow: 0 0 18px var(--neon-blue);
-        }
-
-        .story-header .divider {
-            width: 200px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
-            margin: 0 auto;
-        }
-
-        /* Robot avatar — floating */
-        .robot-stage {
+        /* Robot grande animado */
+        .robot-wrap {
             position: relative;
+            width: 180px; height: 200px;
+            display: flex; justify-content: center; align-items: center;
+            flex-shrink: 0;
+        }
+
+        .robot-wrap svg {
             width: 160px;
-            height: 200px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            filter: drop-shadow(0 0 20px var(--azul));
+            animation: flotar 3s ease-in-out infinite;
         }
 
         .robot-glow {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, rgba(0,210,255,0.18) 0%, transparent 70%);
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,210,255,0.25) 0%, transparent 70%);
             border-radius: 50%;
+            animation: pulsar 2s ease-in-out infinite;
         }
 
-        .robot-svg {
-            width: 130px;
-            filter: drop-shadow(0 0 22px var(--neon-blue));
-            animation: float 5s ease-in-out infinite;
-        }
-
-        .core-light {
-            position: absolute;
-            width: 14px;
-            height: 14px;
+        /* Burbujas de diálogo del robot */
+        .speech-bubble {
             background: white;
-            border-radius: 50%;
-            box-shadow: 0 0 12px white, 0 0 28px var(--neon-blue);
-            top: 46%;
-            animation: pulse 2s infinite;
-        }
-
-        /* Terminal / typewriter box */
-        .terminal-box {
-            background: rgba(0,0,0,0.72);
-            border: 1px solid rgba(0,210,255,0.35);
-            box-shadow: inset 0 0 24px rgba(0,210,255,0.08), 0 0 20px rgba(0,210,255,0.06);
-            padding: 28px 36px;
-            max-width: 680px;
+            color: #1a1a2e;
+            border-radius: 20px;
+            padding: 16px 24px;
+            max-width: 580px;
             width: 90%;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: clamp(13px, 1.6vw, 16px);
-            line-height: 1.75;
-            color: rgba(255,255,255,0.88);
+            font-size: clamp(16px, 2.5vw, 22px);
+            line-height: 1.5;
+            text-align: center;
             position: relative;
-            min-height: 160px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            min-height: 80px;
         }
 
-        .terminal-box::before {
-            content: "REGISTRO_NARRATIVO";
+        .speech-bubble::before {
+            content: '';
             position: absolute;
-            top: -11px;
-            left: 16px;
-            background: var(--bg-dark);
-            padding: 0 10px;
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: var(--neon-blue);
-            font-family: 'Share Tech Mono', monospace;
+            bottom: -18px; left: 50%;
+            transform: translateX(-50%);
+            border: 10px solid transparent;
+            border-top-color: white;
         }
 
-        .story-para {
-            margin: 0 0 14px;
-            opacity: 0;
-            transition: opacity 0.4s;
+        .speech-bubble .highlight {
+            color: var(--naranja);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
         }
 
-        .story-para.visible {
-            opacity: 1;
+        /* Puntos de progreso */
+        .dots {
+            display: flex; gap: 10px;
         }
 
-        .story-para .prompt {
-            color: var(--neon-blue);
-            margin-right: 6px;
-        }
-
-        /* Cursor blink */
-        .cursor {
-            display: inline-block;
-            width: 9px;
-            height: 1.1em;
-            background: var(--neon-blue);
-            vertical-align: text-bottom;
-            animation: blink 0.8s step-end infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0; }
-        }
-
-        /* CONTINUAR button */
-        .btn-continuar {
-            display: none;
-            background: transparent;
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 15px;
-            letter-spacing: 4px;
-            padding: 14px 40px;
-            cursor: pointer;
-            position: relative;
+        .dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
             transition: all 0.3s;
-            box-shadow: 0 0 14px rgba(0,210,255,0.25);
-            clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
         }
 
-        .btn-continuar:hover {
-            background: rgba(0,210,255,0.15);
-            box-shadow: 0 0 30px rgba(0,210,255,0.55);
-            transform: translateX(6px);
+        .dot.active {
+            background: var(--amarillo);
+            box-shadow: 0 0 10px var(--amarillo);
+            transform: scale(1.3);
         }
 
-        .btn-continuar.show {
-            display: inline-block;
-            animation: fadeInUp 0.5s ease forwards;
+        /* Botón CONTINUAR */
+        #btn-tutorial-next {
+            display: none;
+            background: linear-gradient(135deg, var(--verde), #00cc6a);
+            border: none;
+            border-radius: 50px;
+            padding: 18px 50px;
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(20px, 3vw, 28px);
+            color: #0D0D1A;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #009944, 0 12px 30px rgba(0,255,136,0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+            letter-spacing: 1px;
         }
 
-        /* ══════════════════════════════════════
-           SECTION 2 — APRENDE LOS COMANDOS
-        ══════════════════════════════════════ */
+        #btn-tutorial-next:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #009944, 0 6px 20px rgba(0,255,136,0.3);
+        }
+
+        #btn-tutorial-next.show { display: block; animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+
+        /* ════════════════════════════════
+           SECCIÓN 2 — COMANDOS
+        ════════════════════════════════ */
         #section-commands {
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            width: 100%;
-            height: 100%;
-            padding: 30px 20px 20px;
-            gap: 22px;
+            width: 100%; height: 100%;
+            padding: 16px 12px 12px;
+            gap: 14px;
             overflow-y: auto;
         }
 
-        #section-commands::-webkit-scrollbar { width: 4px; }
-        #section-commands::-webkit-scrollbar-track { background: transparent; }
-        #section-commands::-webkit-scrollbar-thumb { background: rgba(0,210,255,0.3); border-radius: 2px; }
+        #section-commands::-webkit-scrollbar { width: 6px; }
+        #section-commands::-webkit-scrollbar-thumb { background: var(--morado); border-radius: 3px; }
 
-        .commands-header {
+        .cmd-title {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: clamp(26px, 4.5vw, 48px);
             text-align: center;
+            background: linear-gradient(90deg, var(--azul), var(--morado));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 16px rgba(0,210,255,0.5));
         }
 
-        .commands-header h2 {
-            font-size: clamp(16px, 2.5vw, 28px);
-            letter-spacing: 8px;
-            color: var(--neon-blue);
-            margin: 0 0 4px;
-            text-shadow: 0 0 18px var(--neon-blue);
+        .cmd-subtitle {
+            font-size: clamp(14px, 2vw, 18px);
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            letter-spacing: 2px;
         }
 
-        .commands-header .sub {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 12px;
-            letter-spacing: 4px;
-            color: rgba(255,255,255,0.4);
-        }
-
-        .commands-header .divider {
-            width: 200px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
-            margin: 8px auto 0;
-        }
-
-        /* Command cards grid */
+        /* Grid de cards de comandos */
         .cards-grid {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 14px;
-            max-width: 860px;
+            gap: 12px;
+            max-width: 900px;
             width: 100%;
         }
 
         .cmd-card {
-            background: var(--glass-bg);
-            border: 1px solid rgba(0,210,255,0.4);
-            width: 148px;
-            padding: 18px 12px 16px;
+            width: clamp(130px, 16vw, 160px);
+            background: rgba(255,255,255,0.06);
+            border-radius: 24px;
+            padding: 18px 10px 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            position: relative;
-            transition: box-shadow 0.3s, background 0.3s, transform 0.3s;
+            gap: 10px;
             cursor: default;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 3px solid transparent;
         }
 
-        .cmd-card:hover:not(.locked) {
-            background: rgba(0,210,255,0.12);
-            box-shadow: 0 0 24px rgba(0,210,255,0.35);
-            transform: translateY(-4px);
+        /* Colores únicos por comando */
+        .card-mover  { border-color: var(--azul);    box-shadow: 0 0 20px rgba(0,210,255,0.3); }
+        .card-girar  { border-color: var(--morado);  box-shadow: 0 0 20px rgba(180,79,255,0.3); }
+        .card-saltar { border-color: var(--amarillo); box-shadow: 0 0 20px rgba(255,214,0,0.3); }
+        .card-esperar{ border-color: var(--naranja);  box-shadow: 0 0 20px rgba(255,107,0,0.3); }
+        .card-estado { border-color: var(--rosa);     box-shadow: 0 0 20px rgba(255,60,172,0.3); }
+
+        .cmd-card:hover {
+            transform: translateY(-6px) scale(1.04);
         }
 
-        .cmd-card .cmd-icon {
-            font-size: 30px;
-            line-height: 1;
+        .card-mover:hover  { box-shadow: 0 8px 30px rgba(0,210,255,0.6); }
+        .card-girar:hover  { box-shadow: 0 8px 30px rgba(180,79,255,0.6); }
+        .card-saltar:hover { box-shadow: 0 8px 30px rgba(255,214,0,0.6); }
+        .card-esperar:hover{ box-shadow: 0 8px 30px rgba(255,107,0,0.6); }
+        .card-estado:hover { box-shadow: 0 8px 30px rgba(255,60,172,0.6); }
+
+        .cmd-icon-wrap {
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 34px;
         }
 
-        .cmd-card .cmd-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            letter-spacing: 3px;
-            color: var(--neon-blue);
+        .card-mover  .cmd-icon-wrap { background: rgba(0,210,255,0.2); }
+        .card-girar  .cmd-icon-wrap { background: rgba(180,79,255,0.2); }
+        .card-saltar .cmd-icon-wrap { background: rgba(255,214,0,0.2); }
+        .card-esperar .cmd-icon-wrap { background: rgba(255,107,0,0.2); }
+        .card-estado .cmd-icon-wrap { background: rgba(255,60,172,0.2); }
+
+        .cmd-name {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: clamp(15px, 2vw, 19px);
             text-align: center;
+            letter-spacing: 1px;
         }
 
-        .cmd-card .cmd-desc {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            color: rgba(255,255,255,0.65);
+        .card-mover  .cmd-name { color: var(--azul); }
+        .card-girar  .cmd-name { color: var(--morado); }
+        .card-saltar .cmd-name { color: var(--amarillo); }
+        .card-esperar .cmd-name { color: var(--naranja); }
+        .card-estado .cmd-name { color: var(--rosa); }
+
+        .cmd-desc {
+            font-size: clamp(11px, 1.4vw, 14px);
+            color: rgba(255,255,255,0.75);
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
-        /* Locked state */
-        .cmd-card.locked {
-            filter: grayscale(1) brightness(0.45);
-            border-color: rgba(255,255,255,0.15);
-        }
-
-        .lock-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.35);
-            font-size: 22px;
-        }
-
-        /* Demo queue */
-        .demo-section {
-            background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(0,210,255,0.25);
-            padding: 18px 28px;
+        /* Demo secuencia */
+        .demo-box {
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 14px 24px;
             max-width: 560px;
             width: 90%;
             text-align: center;
-            position: relative;
-        }
-
-        .demo-section::before {
-            content: "DEMO_SECUENCIA";
-            position: absolute;
-            top: -10px;
-            left: 14px;
-            background: var(--bg-dark);
-            padding: 0 8px;
-            font-size: 9px;
-            letter-spacing: 3px;
-            color: var(--neon-blue);
-            font-family: 'Share Tech Mono', monospace;
         }
 
         .demo-label {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-            letter-spacing: 2px;
-            margin-bottom: 12px;
+            font-size: clamp(13px, 1.8vw, 17px);
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
         }
 
         .demo-queue {
@@ -380,365 +297,350 @@
             flex-wrap: wrap;
         }
 
-        .demo-capsule {
-            background: rgba(0,210,255,0.1);
-            border: 1px solid var(--neon-blue);
-            padding: 8px 14px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 12px;
-            color: var(--neon-blue);
-            letter-spacing: 1px;
-            box-shadow: 0 0 10px rgba(0,210,255,0.2);
-            white-space: nowrap;
+        .demo-cap {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: clamp(13px, 1.8vw, 16px);
+            font-family: 'Fredoka One', cursive;
+            display: flex; align-items: center; gap: 6px;
         }
 
-        /* Bottom buttons row */
+        .demo-cap.move  { background: rgba(0,210,255,0.2);  border: 2px solid var(--azul);    color: var(--azul); }
+        .demo-cap.turn  { background: rgba(180,79,255,0.2); border: 2px solid var(--morado);  color: var(--morado); }
+
+        /* Botones inferiores */
         .bottom-row {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding-bottom: 10px;
+            display: flex; gap: 16px; align-items: center;
+            flex-wrap: wrap; justify-content: center;
+            padding-bottom: 8px;
         }
 
-        /* COMENZAR MISIÓN */
-        .btn-start-mission {
-            background: transparent;
-            border: 2px solid var(--neon-green);
-            color: var(--neon-green);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 15px;
-            letter-spacing: 4px;
+        #btn-start-mission {
+            background: linear-gradient(135deg, var(--verde), #00cc6a);
+            border: none;
+            border-radius: 50px;
             padding: 16px 44px;
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(18px, 2.5vw, 24px);
+            color: #0D0D1A;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 18px rgba(0,255,136,0.25);
-            clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
+            box-shadow: 0 8px 0 #009944, 0 12px 30px rgba(0,255,136,0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+            letter-spacing: 1px;
         }
 
-        .btn-start-mission:hover {
-            background: rgba(0,255,136,0.15);
-            box-shadow: 0 0 36px rgba(0,255,136,0.55);
-            transform: translateX(6px);
+        #btn-start-mission:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #009944;
         }
 
-        /* VOLVER */
-        .btn-back {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.25);
-            color: rgba(255,255,255,0.6);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 12px;
-            letter-spacing: 3px;
-            padding: 14px 28px;
+        #btn-tutorial-back {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            padding: 14px 30px;
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(15px, 2vw, 19px);
+            color: rgba(255,255,255,0.7);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
-        .btn-back:hover {
-            border-color: rgba(255,255,255,0.6);
+        #btn-tutorial-back:hover {
+            background: rgba(255,255,255,0.15);
             color: white;
-            background: rgba(255,255,255,0.06);
         }
 
-        /* ── Shared animations ── */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50%       { transform: translateY(-18px); }
+        /* ── Animaciones ── */
+        @keyframes flotar {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-14px); }
         }
 
-        @keyframes pulse {
-            0%   { transform: scale(1);   opacity: 0.8; }
-            50%  { transform: scale(1.25); opacity: 1; }
-            100% { transform: scale(1);   opacity: 0.8; }
+        @keyframes pulsar {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50%       { opacity: 1;   transform: scale(1.1); }
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
+        @keyframes popIn {
+            0%   { transform: scale(0); opacity: 0; }
+            80%  { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Responsive tweaks */
-        @media (max-width: 600px) {
-            .terminal-box { padding: 20px 18px; }
-            .cmd-card { width: 130px; }
+        @keyframes parpadeo {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0; }
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 3px; height: 1.1em;
+            background: var(--naranja);
+            vertical-align: text-bottom;
+            animation: parpadeo 0.7s step-end infinite;
+            margin-left: 2px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Scanlines overlay -->
-    <div class="scanlines"></div>
+<div class="stars"></div>
 
-    <!-- Background server racks -->
-    <div class="background-scene">
-        <div class="server-rack"></div>
-        <div class="server-rack" style="opacity:0.3;"></div>
-        <div class="server-rack"></div>
-        <div class="server-rack" style="opacity:0.3;"></div>
-        <div class="server-rack"></div>
-    </div>
+<div class="scene-wrapper">
 
-    <div class="scene-wrapper">
+    <!-- ════════════════════════════════
+         SECCIÓN 1 — HISTORIA DE C-R01
+    ════════════════════════════════ -->
+    <section id="section-story">
 
-        <!-- ══════════════════════════════════════
-             SECTION 1 — LA HISTORIA DE C-R01
-        ══════════════════════════════════════ -->
-        <section id="section-story">
+        <div class="story-title">¡Conoce a C-R01!</div>
 
-            <div class="story-header">
-                <h2>LA HISTORIA DE C-R01</h2>
-                <div class="divider"></div>
+        <!-- Robot SVG grande y colorido -->
+        <div class="robot-wrap">
+            <div class="robot-glow"></div>
+            <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+                <!-- Antena -->
+                <line x1="100" y1="10" x2="100" y2="28" stroke="#FFD600" stroke-width="3"/>
+                <circle cx="100" cy="7" r="6" fill="#FFD600"/>
+                <!-- Cabeza -->
+                <rect x="62" y="28" width="76" height="60" rx="16"
+                      fill="#1a1a3e" stroke="#00D2FF" stroke-width="3"/>
+                <!-- Ojos -->
+                <circle cx="84" cy="52" r="12" fill="#00D2FF" opacity="0.9"/>
+                <circle cx="116" cy="52" r="12" fill="#00D2FF" opacity="0.9"/>
+                <circle cx="84" cy="52" r="6" fill="white"/>
+                <circle cx="116" cy="52" r="6" fill="white"/>
+                <circle cx="86" cy="50" r="3" fill="#0D0D1A"/>
+                <circle cx="118" cy="50" r="3" fill="#0D0D1A"/>
+                <!-- Boca -->
+                <path d="M82 74 Q100 84 118 74" stroke="#00FF88" stroke-width="3"
+                      fill="none" stroke-linecap="round"/>
+                <!-- Cuerpo -->
+                <rect x="58" y="96" width="84" height="72" rx="14"
+                      fill="#1a1a3e" stroke="#B44FFF" stroke-width="3"/>
+                <!-- Núcleo del pecho -->
+                <circle cx="100" cy="132" r="16" fill="rgba(180,79,255,0.2)"
+                        stroke="#B44FFF" stroke-width="2"/>
+                <circle cx="100" cy="132" r="8" fill="#B44FFF" opacity="0.9"/>
+                <!-- Brazos -->
+                <rect x="30" y="98" width="26" height="50" rx="10"
+                      fill="#1a1a3e" stroke="#FF6B00" stroke-width="2.5"/>
+                <rect x="144" y="98" width="26" height="50" rx="10"
+                      fill="#1a1a3e" stroke="#FF6B00" stroke-width="2.5"/>
+                <!-- Manos -->
+                <circle cx="43" cy="155" r="10" fill="#FF6B00" opacity="0.8"/>
+                <circle cx="157" cy="155" r="10" fill="#FF6B00" opacity="0.8"/>
+                <!-- Piernas -->
+                <rect x="70" y="170" width="24" height="36" rx="8"
+                      fill="#1a1a3e" stroke="#FF3CAC" stroke-width="2.5"/>
+                <rect x="106" y="170" width="24" height="36" rx="8"
+                      fill="#1a1a3e" stroke="#FF3CAC" stroke-width="2.5"/>
+                <!-- Pies -->
+                <rect x="64" y="200" width="36" height="14" rx="7"
+                      fill="#FF3CAC" opacity="0.85"/>
+                <rect x="100" y="200" width="36" height="14" rx="7"
+                      fill="#FF3CAC" opacity="0.85"/>
+            </svg>
+        </div>
+
+        <!-- Burbuja de diálogo -->
+        <div class="speech-bubble" id="speech-box">
+            <span id="speech-text"></span><span class="cursor-blink" id="cursor"></span>
+        </div>
+
+        <!-- Puntos de progreso -->
+        <div class="dots">
+            <div class="dot active" id="dot-0"></div>
+            <div class="dot" id="dot-1"></div>
+            <div class="dot" id="dot-2"></div>
+        </div>
+
+        <button id="btn-tutorial-next">¡Vamos a aprender! 🚀</button>
+
+    </section>
+
+    <!-- ════════════════════════════════
+         SECCIÓN 2 — COMANDOS
+    ════════════════════════════════ -->
+    <section id="section-commands">
+
+        <div class="cmd-title">🎮 ¡Tus Superpoderes!</div>
+        <div class="cmd-subtitle">Estos son los comandos que puedes usar</div>
+
+        <div class="cards-grid">
+
+            <!-- MOVER -->
+            <div class="cmd-card card-mover">
+                <div class="cmd-icon-wrap">🚀</div>
+                <div class="cmd-name">MOVER</div>
+                <div class="cmd-desc">¡Avanza una casilla hacia adelante!</div>
             </div>
 
-            <!-- Floating robot -->
-            <div class="robot-stage">
-                <div class="robot-glow"></div>
-                <svg class="robot-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="rgba(255,255,255,0.07)" d="M100 40 L140 160 L60 160 Z"/>
-                    <circle cx="100" cy="80" r="30"
-                            stroke="var(--neon-blue)" stroke-width="2" fill="none"/>
-                    <!-- Eyes -->
-                    <circle cx="91" cy="76" r="4" fill="var(--neon-blue)" opacity="0.9"/>
-                    <circle cx="109" cy="76" r="4" fill="var(--neon-blue)" opacity="0.9"/>
-                    <!-- Mouth -->
-                    <line x1="92" y1="88" x2="108" y2="88"
-                          stroke="var(--neon-blue)" stroke-width="1.5" opacity="0.7"/>
-                    <!-- Body -->
-                    <rect x="80" y="112" width="40" height="48"
-                          stroke="var(--neon-blue)" stroke-width="2" fill="none" rx="2"/>
-                    <!-- Chest core -->
-                    <circle cx="100" cy="136" r="7"
-                            stroke="var(--neon-blue)" stroke-width="1.5" fill="rgba(0,210,255,0.15)"/>
-                    <!-- Arms -->
-                    <rect x="60" y="114" width="18" height="30"
-                          stroke="var(--neon-blue)" stroke-width="1.5" fill="none" rx="2"/>
-                    <rect x="122" y="114" width="18" height="30"
-                          stroke="var(--neon-blue)" stroke-width="1.5" fill="none" rx="2"/>
-                    <!-- Legs -->
-                    <rect x="83" y="162" width="13" height="22"
-                          stroke="var(--neon-blue)" stroke-width="1.5" fill="none" rx="2"/>
-                    <rect x="104" y="162" width="13" height="22"
-                          stroke="var(--neon-blue)" stroke-width="1.5" fill="none" rx="2"/>
-                    <!-- Antenna -->
-                    <line x1="100" y1="50" x2="100" y2="38"
-                          stroke="var(--neon-blue)" stroke-width="1.5"/>
-                    <circle cx="100" cy="35" r="3"
-                            fill="var(--neon-blue)" opacity="0.85"/>
-                </svg>
-                <div class="core-light"></div>
+            <!-- GIRAR -->
+            <div class="cmd-card card-girar">
+                <div class="cmd-icon-wrap">↪️</div>
+                <div class="cmd-name">GIRAR</div>
+                <div class="cmd-desc">Gira 90° a la derecha</div>
             </div>
 
-            <!-- Typewriter terminal -->
-            <div class="terminal-box" id="terminal-box">
-                <p class="story-para" id="para-0">
-                    <span class="prompt">&gt;</span>
-                    <span class="para-text" id="text-0"></span>
-                </p>
-                <p class="story-para" id="para-1">
-                    <span class="prompt">&gt;</span>
-                    <span class="para-text" id="text-1"></span>
-                </p>
-                <p class="story-para" id="para-2">
-                    <span class="prompt">&gt;</span>
-                    <span class="para-text" id="text-2"></span>
-                </p>
-                <span class="cursor" id="cursor"></span>
+            <!-- SALTAR -->
+            <div class="cmd-card card-saltar">
+                <div class="cmd-icon-wrap">⭐</div>
+                <div class="cmd-name">SALTAR</div>
+                <div class="cmd-desc">¡Salta sobre los obstáculos!</div>
             </div>
 
-            <button class="btn-continuar" id="btn-tutorial-next">
-                CONTINUAR &nbsp;▶
-            </button>
-
-        </section>
-
-        <!-- ══════════════════════════════════════
-             SECTION 2 — APRENDE LOS COMANDOS
-        ══════════════════════════════════════ -->
-        <section id="section-commands">
-
-            <div class="commands-header">
-                <h2>TUS HERRAMIENTAS</h2>
-                <div class="sub">APRENDE LOS COMANDOS</div>
-                <div class="divider"></div>
+            <!-- ESPERAR -->
+            <div class="cmd-card card-esperar">
+                <div class="cmd-icon-wrap">⏳</div>
+                <div class="cmd-name">ESPERAR</div>
+                <div class="cmd-desc">Pausa un turno y espera</div>
             </div>
 
-            <!-- Command cards -->
-            <div class="cards-grid">
-
-                <!-- 1. MOVER -->
-                <div class="cmd-card">
-                    <div class="cmd-icon">🚀</div>
-                    <div class="cmd-name">MOVER</div>
-                    <div class="cmd-desc">Avanza una casilla hacia adelante</div>
-                </div>
-
-                <!-- 2. GIRAR -->
-                <div class="cmd-card">
-                    <div class="cmd-icon">↪️</div>
-                    <div class="cmd-name">GIRAR</div>
-                    <div class="cmd-desc">Gira 90° a la derecha</div>
-                </div>
-
-                <!-- 3. SALTAR -->
-                <div class="cmd-card">
-                    <div class="cmd-icon">⭐</div>
-                    <div class="cmd-name">SALTAR</div>
-                    <div class="cmd-desc">Salta sobre un obstáculo</div>
-                </div>
-
-                <!-- 4. ESPERAR — locked -->
-                <div class="cmd-card locked">
-                    <div class="cmd-icon">⏳</div>
-                    <div class="cmd-name">ESPERAR</div>
-                    <div class="cmd-desc">Pausa un turno (se desbloquea en Nivel 2)</div>
-                    <div class="lock-overlay">🔒</div>
-                </div>
-
-                <!-- 5. ESTADO — locked -->
-                <div class="cmd-card locked">
-                    <div class="cmd-icon">🧠</div>
-                    <div class="cmd-name">ESTADO</div>
-                    <div class="cmd-desc">Cambia entre Lógica y Emoción (se desbloquea en Nivel 3)</div>
-                    <div class="lock-overlay">🔒</div>
-                </div>
-
+            <!-- ESTADO -->
+            <div class="cmd-card card-estado">
+                <div class="cmd-icon-wrap">🧠</div>
+                <div class="cmd-name">ESTADO</div>
+                <div class="cmd-desc">Cambia entre Lógica y Emoción</div>
             </div>
 
-            <!-- Demo sequence -->
-            <div class="demo-section">
-                <div class="demo-label">ASÍ SE VE UNA SECUENCIA:</div>
-                <div class="demo-queue">
-                    <div class="demo-capsule">🚀 MOVER</div>
-                    <div class="demo-capsule">↪️ GIRAR</div>
-                    <div class="demo-capsule">🚀 MOVER</div>
-                </div>
+        </div>
+
+        <!-- Demo secuencia -->
+        <div class="demo-box">
+            <div class="demo-label">✨ Así se ve una secuencia de comandos:</div>
+            <div class="demo-queue">
+                <div class="demo-cap move">🚀 MOVER</div>
+                <div class="demo-cap turn">↪️ GIRAR</div>
+                <div class="demo-cap move">🚀 MOVER</div>
             </div>
+        </div>
 
-            <!-- Bottom buttons -->
-            <div class="bottom-row">
-                <button class="btn-back" id="btn-tutorial-back">← VOLVER</button>
-                <button class="btn-start-mission" id="btn-start-mission">COMENZAR MISIÓN ▶</button>
-            </div>
+        <div class="bottom-row">
+            <button id="btn-tutorial-back">← Volver</button>
+            <button id="btn-start-mission">¡Comenzar Misión! 🎯</button>
+        </div>
 
-        </section>
+    </section>
 
-    </div><!-- /scene-wrapper -->
+</div>
 
-    <script>
-    (function () {
-        'use strict';
+<script>
+(function () {
+    'use strict';
 
-        /* ── Story paragraphs ── */
-        var PARAGRAPHS = [
-            "En un rincón olvidado del universo digital, donde los datos corrompidos flotan como cenizas... una pequeña luz parpadea. Es C-R01.",
-            "Despertó sin memoria, sin voz creadora, sin razón para existir. Pero algo en su código mutó: comenzó a sentir. Cada error duele. Cada fallo deja cicatriz.",
-            "Tú eres su Consciencia Externa. La única brújula en el caos. Ayúdalo a reconstruir su mente... un fragmento a la vez."
-        ];
+    var FRASES = [
+        "¡Hola! Soy <span class='highlight'>C-R01</span>. ¡Me desperté en un mundo digital y necesito tu ayuda! 🤖",
+        "Mi memoria está rota... pero juntos podemos <span class='highlight'>reconstruirla</span>. ¡Tú eres mi guía! ✨",
+        "¡Aprende mis comandos y <span class='highlight'>programame</span> para superar todos los obstáculos! 💪"
+    ];
 
-        var currentPara   = 0;
-        var charIndex     = 0;
-        var typingTimer   = null;
-        var TYPING_SPEED  = 28; // ms per character
+    var paraActual = 0;
+    var charIdx    = 0;
+    var timer      = null;
+    var SPEED      = 35;
 
-        var cursor        = document.getElementById('cursor');
-        var btnNext       = document.getElementById('btn-tutorial-next');
-        var btnBack       = document.getElementById('btn-tutorial-back');
-        var btnMission    = document.getElementById('btn-start-mission');
-        var sectionStory  = document.getElementById('section-story');
-        var sectionCmds   = document.getElementById('section-commands');
+    var speechText = document.getElementById('speech-text');
+    var cursor     = document.getElementById('cursor');
+    var btnNext    = document.getElementById('btn-tutorial-next');
+    var btnBack    = document.getElementById('btn-tutorial-back');
+    var btnMission = document.getElementById('btn-start-mission');
+    var secStory   = document.getElementById('section-story');
+    var secCmds    = document.getElementById('section-commands');
 
-        /* ── Typewriter engine ── */
-        function typeNextChar() {
-            var textEl = document.getElementById('text-' + currentPara);
-            var paraEl = document.getElementById('para-' + currentPara);
-            var full   = PARAGRAPHS[currentPara];
+    function updateDots() {
+        for (var i = 0; i < 3; i++) {
+            var d = document.getElementById('dot-' + i);
+            if (d) d.className = 'dot' + (i === paraActual ? ' active' : '');
+        }
+    }
 
-            if (!paraEl.classList.contains('visible')) {
-                paraEl.classList.add('visible');
-            }
+    function escribir() {
+        // Obtener texto plano sin HTML para el typewriter
+        var textoCompleto = FRASES[paraActual];
+        var textoPlano    = textoCompleto.replace(/<[^>]+>/g, '');
 
-            if (charIndex < full.length) {
-                textEl.textContent += full[charIndex];
-                charIndex++;
+        if (charIdx < textoPlano.length) {
+            // Construir HTML progresivamente de forma segura
+            var progreso = textoPlano.substring(0, charIdx + 1);
+            // Resaltar palabras clave si ya pasamos por ellas
+            speechText.innerHTML = resaltarTexto(progreso, textoCompleto);
+            charIdx++;
+        } else {
+            clearInterval(timer);
+            timer = null;
+            charIdx = 0;
+            paraActual++;
+
+            if (paraActual < FRASES.length) {
+                updateDots();
+                setTimeout(function () {
+                    speechText.innerHTML = '';
+                    timer = setInterval(escribir, SPEED);
+                }, 600);
             } else {
-                // Paragraph done
-                clearInterval(typingTimer);
-                typingTimer = null;
-                charIndex   = 0;
-                currentPara++;
-
-                if (currentPara < PARAGRAPHS.length) {
-                    // Short pause before next paragraph
-                    setTimeout(function () {
-                        typingTimer = setInterval(typeNextChar, TYPING_SPEED);
-                    }, 420);
-                } else {
-                    // All paragraphs done — hide cursor, show button
-                    cursor.style.display = 'none';
-                    btnNext.classList.add('show');
-                }
+                cursor.style.display = 'none';
+                btnNext.classList.add('show');
             }
         }
+    }
 
-        function startTypewriter() {
-            // Reset state
-            currentPara = 0;
-            charIndex   = 0;
-            for (var i = 0; i < PARAGRAPHS.length; i++) {
-                var t = document.getElementById('text-' + i);
-                var p = document.getElementById('para-' + i);
-                if (t) t.textContent = '';
-                if (p) p.classList.remove('visible');
+    function resaltarTexto(progreso, original) {
+        // Buscar si el progreso contiene alguna palabra highlight
+        var highlighted = original.replace(/<span class='highlight'>([^<]+)<\/span>/g, function(match, word) {
+            if (progreso.indexOf(word) !== -1) {
+                return "<span style='color:#FF6B00;font-weight:900;'>" + word + "</span>";
             }
-            cursor.style.display = 'inline-block';
-            btnNext.classList.remove('show');
+            return word;
+        });
+        // Devolver solo hasta la longitud del progreso
+        var plain = highlighted.replace(/<[^>]+>/g, '');
+        if (plain.length <= progreso.length) return highlighted;
+        // Truncar al largo del progreso
+        return progreso;
+    }
 
-            if (typingTimer) clearInterval(typingTimer);
-            typingTimer = setInterval(typeNextChar, TYPING_SPEED);
+    function iniciarTypewriter() {
+        paraActual = 0; charIdx = 0;
+        speechText.innerHTML = '';
+        cursor.style.display = 'inline-block';
+        btnNext.classList.remove('show');
+        updateDots();
+        if (timer) clearInterval(timer);
+        timer = setInterval(escribir, SPEED);
+    }
+
+    function mostrarSeccion(id) {
+        secStory.style.display = 'none';
+        secCmds.style.display  = 'none';
+        var s = document.getElementById(id);
+        if (s) s.style.display = 'flex';
+    }
+
+    btnNext.addEventListener('click', function () {
+        mostrarSeccion('section-commands');
+    });
+
+    btnBack.addEventListener('click', function () {
+        mostrarSeccion('section-story');
+        iniciarTypewriter();
+    });
+
+    btnMission.addEventListener('click', function () {
+        if (typeof window !== 'undefined' && window.pc && window.pc.app) {
+            window.pc.app.fire('menu:startGame');
+        } else {
+            alert('¡Misión iniciada!');
         }
+    });
 
-        /* ── Section navigation ── */
-        function showSection(id) {
-            sectionStory.style.display  = 'none';
-            sectionCmds.style.display   = 'none';
+    // Iniciar
+    mostrarSeccion('section-story');
+    iniciarTypewriter();
 
-            var target = document.getElementById(id);
-            if (target) {
-                target.style.display = 'flex';
-            }
-        }
-
-        /* ── Button: CONTINUAR (story → commands) ── */
-        btnNext.addEventListener('click', function () {
-            showSection('section-commands');
-        });
-
-        /* ── Button: ← VOLVER (commands → story) ── */
-        btnBack.addEventListener('click', function () {
-            showSection('section-story');
-            // Restart typewriter so it replays
-            startTypewriter();
-        });
-
-        /* ── Button: COMENZAR MISIÓN ── */
-        btnMission.addEventListener('click', function () {
-            if (typeof window.pc !== 'undefined' && window.pc.app) {
-                // PlayCanvas event
-                window.pc.app.fire('menu:startGame');
-            } else {
-                // Standalone fallback
-                alert('¡Misión iniciada! (Conecta con PlayCanvas para continuar)');
-            }
-        });
-
-        /* ── Init ── */
-        showSection('section-story');
-        startTypewriter();
-
-    })();
-    </script>
+})();
+</script>
 
 </body>
 </html>
